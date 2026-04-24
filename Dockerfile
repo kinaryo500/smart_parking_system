@@ -23,8 +23,15 @@ COPY . .
 
 RUN cp .env.example .env || touch .env
 
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install \
+    --no-interaction \
+    --no-dev \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-scripts
 
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN php artisan key:generate --force
+
+RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 8080
