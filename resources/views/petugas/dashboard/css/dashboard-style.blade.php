@@ -34,7 +34,6 @@
         text-transform: uppercase;
     }
 
-    /* Slot Grid Styling */
     .kantung {
         background: #ffffff;
         border-radius: 10px;
@@ -121,12 +120,11 @@
         letter-spacing: 0.5px;
     }
 
-    /* Material Icon Sizing */
     .material-icons {
         font-size: 34px;
     }
 
-    /* Responsive */
+
     @media (max-width: 768px) {
         .qr-mini-card {
             width: 100%;

@@ -10,11 +10,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | ADMIN
-        |--------------------------------------------------------------------------
-        */
+
         User::create([
             'name' => 'Admin Smart Parking',
             'email' => 'admin@smartparking.test',
@@ -23,12 +19,8 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | PETUGAS (3)
-        |--------------------------------------------------------------------------
-        */
-        for ($i = 1; $i <= 3; $i++) {
+
+        for ($i = 1; $i <= 1; $i++) {
             User::create([
                 'name' => "Petugas {$i}",
                 'email' => "petugas{$i}@smartparking.test",
@@ -38,15 +30,10 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | USER (5)
-        |--------------------------------------------------------------------------
-        */
         
             User::create([
                 'name' => "User {$i}",
-                'email' => "kinaryo733huda@gmail.com",
+                'email' => "user1@smartparking.test",
                 'no_hp' => "08333333333{$i}",
                 'role' => 'user',
                 'password' => Hash::make('password'),

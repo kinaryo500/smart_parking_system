@@ -51,7 +51,6 @@
 @section('content')
 <div class="container mt-4">
     
-    <!-- DETAIL KENDARAAN (HEADER) -->
     <div class="card card-main p-4 text-center">
         @php $jenis = strtolower($kendaraan->jenis); @endphp
 
@@ -71,7 +70,6 @@
         </p>
     </div>
 
-    <!-- PARKIR AKTIF -->
     <div class="section-title">Parkir Aktif</div>
 
     @forelse($parkirAktif as $i => $p)

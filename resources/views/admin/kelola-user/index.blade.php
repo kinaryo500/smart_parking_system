@@ -3,7 +3,6 @@
 @section('content')
     <div class="container">
 
-        {{-- HEADER --}}
         <div class="row mb-3">
             <div class="col-12">
                 <div class="card border-0 shadow-sm rounded overflow-hidden">
@@ -24,7 +23,6 @@
             </div>
         </div>
 
-        {{-- TABLE --}}
         <div class="card border-0 shadow-sm rounded p-3">
 
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -70,7 +68,7 @@
 
     </div>
 
-    {{-- MODAL --}}
+
     <div class="modal fade" id="modalForm">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -133,14 +131,13 @@
         const TOGGLE_URL = "{{ url('admin/user/toggle') }}";
 
         let editMode = false;
-        let userDataList = []; // Simpan data global untuk pencarian index saat edit
+        let userDataList = []; 
 
         const searchInput = document.getElementById('search');
         const statusFilter = document.getElementById('status');
         const tableBody = document.getElementById('tableBody');
         const errorBox = document.getElementById('errorBox');
 
-        // Referensi elemen form
         const userIdInput = document.getElementById('user_id');
         const nameInput = document.getElementById('name');
         const emailInput = document.getElementById('email');
@@ -154,7 +151,7 @@
             try {
                 const res = await fetch(`${API}?search=${searchInput.value}&status=${statusFilter.value}`);
                 const result = await res.json();
-                userDataList = result.data || []; // Update data global
+                userDataList = result.data || [];
                 renderTable(userDataList);
             } catch (e) {
                 console.error(e);

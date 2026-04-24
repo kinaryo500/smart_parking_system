@@ -237,11 +237,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        
-        // --- Loading Hanya di SweetAlert ---
         const showLoading = (formElement) => {
-            // Kita tetap disable tombol agar tidak diklik 2x, tapi tidak mengubah visual tombol
-            const btnSubmit = formElement.querySelector('button[type="submit"]');
+          const btnSubmit = formElement.querySelector('button[type="submit"]');
             btnSubmit.disabled = true;
 
             Swal.fire({

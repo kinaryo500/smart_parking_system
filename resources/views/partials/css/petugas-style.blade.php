@@ -7,7 +7,7 @@
             --transition-speed: 0.3s;
         }
 
-        /* Lock Body Scroll */
+
         body {
             background: var(--bg-body);
             color: #1e293b;
@@ -17,8 +17,6 @@
             height: 100vh;
             overflow: hidden;
         }
-
-        /* --- SIDEBAR STYLE (Fixed Position) --- */
         #sidebar {
             width: var(--sidebar-width);
             min-width: var(--sidebar-width);
@@ -59,7 +57,6 @@
             color: var(--primary-color);
         }
 
-        /* Sticky Top Navbar */
         .top-navbar {
             background: #ffffff;
             padding: 15px 25px;
@@ -83,17 +80,12 @@
             position: relative;
         }
 
-
-
-        /* Dashboard UI Elements */
         .header-container {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             padding: 20px 0;
         }
-
-        /* Responsive */
         @media (max-width: 768px) {
             #sidebar {
                 position: fixed;
@@ -114,5 +106,60 @@
             }
 
         }
+
+        .spin {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .table thead th {
+            letter-spacing: 0.05rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.8em;
+            border-radius: 6px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: none;
+            background-color: #f1f3f5;
+        }
+
+        .pagination .page-link {
+            color: #495057;
+            border: none;
+            margin: 0 2px;
+            border-radius: 6px !important;
+            cursor: pointer;
+        }
+
+        .pagination .active .page-link {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        .pagination .disabled .page-link {
+            background-color: transparent;
+            color: #ced4da;
+            cursor: not-allowed;
+        }
     </style>
+
 @endpush

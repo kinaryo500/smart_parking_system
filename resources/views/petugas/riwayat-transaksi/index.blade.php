@@ -128,61 +128,6 @@
 
     </div>
 
-    <style>
-        .spin {
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .card {
-            transition: all 0.3s ease;
-        }
-
-        .table thead th {
-            letter-spacing: 0.05rem;
-            font-size: 0.75rem;
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.5em 0.8em;
-            border-radius: 6px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            box-shadow: none;
-            background-color: #f1f3f5;
-        }
-
-        .pagination .page-link {
-            color: #495057;
-            border: none;
-            margin: 0 2px;
-            border-radius: 6px !important;
-            cursor: pointer;
-        }
-
-        .pagination .active .page-link {
-            background-color: #0d6efd !important;
-            color: white !important;
-        }
-
-        .pagination .disabled .page-link {
-            background-color: transparent;
-            color: #ced4da;
-            cursor: not-allowed;
-        }
-    </style>
 
     <script>
         const API_DATA = "{{ route('petugas.transaksi.data') }}";
@@ -215,7 +160,6 @@
             btn.classList.add('disabled');
 
             try {
-                // Kirim parameter page, search, dan status ke Backend
                 const url = new URL(API_DATA);
                 url.searchParams.append('page', page);
                 url.searchParams.append('search', search);
@@ -239,7 +183,7 @@
         }
 
         function renderTable(paginator) {
-            const data = paginator.data; // Data transaksi ada di dalam properti .data
+            const data = paginator.data;
             let html = '';
 
             if (data.length === 0) {
@@ -251,16 +195,16 @@
                         '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 w-100">Parkir</span>';
 
                     html += `
-                                        <tr>
-                                            <td class="ps-4"><span class="fw-bold text-dark bg-light px-2 py-1 rounded border small text-nowrap">${t.plat_nomor}</span></td>
-                                            <td class="small text-muted">${t.jenis_kendaraan}</td>
-                                            <td class="small text-nowrap">${formatTime(t.waktu_masuk)}</td>
-                                            <td class="small text-nowrap">${t.waktu_keluar ? formatTime(t.waktu_keluar) : '<span class="text-muted italic">-</span>'}</td>
-                                            <td class="text-center small">${hitungDurasi(t.total_waktu)}</td>
-                                            <td class="text-end fw-bold text-dark small">Rp ${formatRupiah(t.total_bayar)}</td>
-                                            <td class="px-4 text-center">${statusBadge}</td>
-                                        </tr>
-                                    `;
+                                            <tr>
+                                                <td class="ps-4"><span class="fw-bold text-dark bg-light px-2 py-1 rounded border small text-nowrap">${t.plat_nomor}</span></td>
+                                                <td class="small text-muted">${t.jenis_kendaraan}</td>
+                                                <td class="small text-nowrap">${formatTime(t.waktu_masuk)}</td>
+                                                <td class="small text-nowrap">${t.waktu_keluar ? formatTime(t.waktu_keluar) : '<span class="text-muted italic">-</span>'}</td>
+                                                <td class="text-center small">${hitungDurasi(t.total_waktu)}</td>
+                                                <td class="text-end fw-bold text-dark small">Rp ${formatRupiah(t.total_bayar)}</td>
+                                                <td class="px-4 text-center">${statusBadge}</td>
+                                            </tr>
+                                        `;
                 });
             }
 
@@ -280,33 +224,30 @@
 
             let html = '';
 
-            // Previous
             html += `<li class="page-item ${paginator.current_page === 1 ? 'disabled' : ''}">
-                                <a class="page-link" onclick="changePage(${paginator.current_page - 1})"><i class="bi bi-chevron-left"></i></a>
-                            </li>`;
+                                    <a class="page-link" onclick="changePage(${paginator.current_page - 1})"><i class="bi bi-chevron-left"></i></a>
+                                </li>`;
 
-            // Berdasarkan metadata Laravel
+
             for (let i = 1; i <= paginator.last_page; i++) {
-                // Logika sederhana menampilkan halaman (halaman 1, halaman terakhir, dan halaman sekitar current)
                 if (i === 1 || i === paginator.last_page || (i >= paginator.current_page - 1 && i <= paginator
                     .current_page + 1)) {
                     html += `<li class="page-item ${paginator.current_page === i ? 'active' : ''}">
-                                        <a class="page-link" onclick="changePage(${i})">${i}</a>
-                                    </li>`;
+                                            <a class="page-link" onclick="changePage(${i})">${i}</a>
+                                        </li>`;
                 } else if (i === paginator.current_page - 2 || i === paginator.current_page + 2) {
                     html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
                 }
             }
 
-            // Next
+
             html += `<li class="page-item ${paginator.current_page === paginator.last_page ? 'disabled' : ''}">
-                                <a class="page-link" onclick="changePage(${paginator.current_page + 1})"><i class="bi bi-chevron-right"></i></a>
-                            </li>`;
+                                    <a class="page-link" onclick="changePage(${paginator.current_page + 1})"><i class="bi bi-chevron-right"></i></a>
+                                </li>`;
 
             container.innerHTML = html;
         }
 
-        // Fungsi utama penarik data
         function fetchAll() {
             fetchSummary();
             fetchTableData(currentPage);
@@ -321,7 +262,7 @@
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 resetAndFetch();
-            }, 500); // Tunggu 0.5 detik setelah ngetik baru tembak API
+            }, 500);
         }
 
         function changePage(page) {
@@ -359,7 +300,6 @@
             return jam > 0 ? `${jam}j ${sisa}m` : `${sisa}m`;
         }
 
-        // Start
         fetchAll();
     </script>
 @endsection

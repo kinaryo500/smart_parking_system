@@ -7,9 +7,6 @@
 
     <div class="py-3 flex-grow-1">
 
-        {{-- ===================== --}}
-        {{-- PETUGAS --}}
-        {{-- ===================== --}}
         @if(auth()->user()->role === 'petugas')
 
             <a href="{{ route('petugas.dashboard') }}"
@@ -23,10 +20,6 @@
             </a>
         @endif
 
-
-        {{-- ===================== --}}
-        {{-- ADMIN --}}
-        {{-- ===================== --}}
         @if(auth()->user()->role === 'admin')
 
             <a href="{{ route('admin.dashboard') }}"
@@ -64,9 +57,6 @@
 
     </div>
 
-    {{-- ===================== --}}
-    {{-- LOGOUT --}}
-    {{-- ===================== --}}
     <div class="p-3 border-top">
         <form id="logoutForm" action="{{ route('logout') }}" method="POST">
             @csrf
@@ -78,9 +68,6 @@
     </div>
 </nav>
 
-{{-- ===================== --}}
-{{-- SWEETALERT --}}
-{{-- ===================== --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>

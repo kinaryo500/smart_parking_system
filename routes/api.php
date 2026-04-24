@@ -5,11 +5,7 @@ use Illuminate\Http\Request;
 use App\Services\SlotService;
 use App\Events\SlotUpdated;
 
-/*
-=====================================
-ESP → LARAVEL (RECEIVE SLOT UPDATE)
-=====================================
-*/
+
 Route::post('/esp/update-slot', function (Request $request) {
 
     $data = $request->all();
@@ -27,11 +23,6 @@ Route::post('/esp/update-slot', function (Request $request) {
     ]);
 });
 
-/*
-=====================================
-ESP → LARAVEL (GET COMMAND)
-=====================================
-*/
 Route::get('/esp/get-command', function () {
 
     $queue = cache()->get('esp_queue', []);
@@ -56,11 +47,6 @@ Route::get('/esp/get-command', function () {
     ]);
 });
 
-/*
-=====================================
-ADMIN → PUSH COMMAND KE ESP
-=====================================
-*/
 Route::post('/esp/push-command', function (Request $request) {
 
     $queue = cache()->get('esp_queue', []);

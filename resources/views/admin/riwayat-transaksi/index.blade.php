@@ -205,15 +205,10 @@
         let currentPage = 1;
         let lastUpdateDate = new Date();
         let searchTimeout = null;
-
-        /* =========================
-           FETCH SUMMARY
-        ========================= */
         async function fetchSummary() {
             try {
                 const res = await fetch(API_SUMMARY);
 
-                // 🔥 CEK RESPONSE (hindari error "<")
                 if (!res.ok) throw new Error("Gagal fetch summary");
 
                 const data = await res.json();
@@ -228,9 +223,7 @@
             }
         }
 
-        /* =========================
-           FETCH TABLE DATA
-        ========================= */
+
         async function fetchTableData(page = 1) {
             const icon = document.getElementById('iconRefresh');
             const btn = document.getElementById('btnRefresh');
@@ -248,7 +241,7 @@
 
                 const res = await fetch(url);
 
-                // 🔥 CEK RESPONSE
+
                 if (!res.ok) throw new Error("Response bukan JSON / error server");
 
                 const responseData = await res.json();
@@ -268,9 +261,6 @@
             }
         }
 
-        /* =========================
-           RENDER TABLE
-        ========================= */
         function renderTable(paginator) {
             const data = paginator.data;
             let html = '';
@@ -347,9 +337,7 @@
             renderPagination(paginator);
         }
 
-        /* =========================
-           PAGINATION
-        ========================= */
+
         function renderPagination(paginator) {
             const container = document.getElementById('paginationControl');
             if (paginator.last_page <= 1) {
@@ -384,9 +372,7 @@
             container.innerHTML = html;
         }
 
-        /* =========================
-           UTIL FUNCTION
-        ========================= */
+
         function fetchAll() {
             fetchSummary();
             fetchTableData(currentPage);
@@ -437,15 +423,9 @@
             return jam > 0 ? `${jam}j ${sisa}m` : `${sisa}m`;
         }
 
-        /* =========================
-           AUTO REFRESH
-        ========================= */
         setInterval(fetchAll, 120000);
         setInterval(updateTimeText, 30000);
 
-        /* =========================
-           START
-        ========================= */
         fetchAll();
     </script>
 @endsection

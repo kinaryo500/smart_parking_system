@@ -66,7 +66,6 @@
 <div class="container mt-4 mb-5">
     <div class="card card-detail p-4 text-center shadow-sm">
 
-        {{-- 1. HEADER & ICON --}}
         <div class="mb-3">
             @php $jenis = strtolower($transaksi->jenis_kendaraan); @endphp
 
@@ -90,7 +89,6 @@
             </div>
         </div>
 
-        {{-- 2. INFORMASI KENDARAAN (PLAT NOMOR) --}}
         <div class="bg-light rounded-4 p-3 mb-4">
             <h4 class="fw-bold mb-0 text-dark" style="letter-spacing:3px">
                 {{ strtoupper($transaksi->kendaraan->plat_nomor ?? '-') }}
@@ -100,7 +98,6 @@
             </small>
         </div>
 
-        {{-- 3. GRID INFORMASI WAKTU --}}
         <div class="row g-2 mb-4">
             <div class="col-6 col-sm-4">
                 <div class="info-box">
@@ -139,7 +136,6 @@
 
         <hr class="my-4 opacity-25">
 
-        {{-- 4. DURASI & ESTIMASI BIAYA --}}
         <div class="py-2">
             <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size:0.7rem; letter-spacing: 1px;">
                 Durasi Parkir
@@ -168,7 +164,6 @@
             </div>
         </div>
 
-        {{-- 5. BUTTON KEMBALI --}}
         <div class="d-grid mt-4">
             <a href="{{ route('user.dashboard') }}" class="btn btn-outline-secondary fw-bold py-2 rounded-pill">
                 <span class="material-symbols-rounded align-middle fs-6 me-1">arrow_back</span> Kembali
@@ -187,10 +182,6 @@
     let currentStatus = "{{ $transaksi->status }}";
     let liveInterval;
 
-    /**
-     * 1. LIVE COUNTER LOGIC
-     * Menghitung durasi dan biaya secara real-time di sisi client
-     */
     function startLiveCounter() {
         const start = new Date("{{ $transaksi->waktu_masuk }}").getTime();
         const tarif = {{ $transaksi->tarif_per_jam }};
@@ -203,11 +194,9 @@
             const jam = Math.floor(menitTotal / 60);
             const menitSisa = menitTotal % 60;
 
-            // Update Teks Durasi
+
             document.getElementById('durasiDisplay').innerHTML = 
                 jam > 0 ? `${jam} jam ${menitSisa} menit` : `${menitTotal} menit`;
-
-            // Update Biaya (Logika: Minimal 1 jam, pembulatan ke atas per jam)
             const tagihanJam = Math.max(1, Math.ceil(menitTotal / 60));
             const totalEstimasi = tagihanJam * tarif;
 
@@ -222,10 +211,6 @@
         startLiveCounter();
     }
 
-    /**
-     * 2. REALTIME WEBSOCKET (LARAVEL ECHO)
-     * Mendengarkan instruksi dari Hardware/Admin
-     */
     function initEcho() {
         if (typeof window.Echo === 'undefined') {
             console.warn("Retrying Echo Connection...");
@@ -233,7 +218,7 @@
             return;
         }
 
-        console.log("✅ Realtime Channel Connected");
+        console.log("Realtime Channel Connected");
 
         window.Echo.channel('slot-tracker')
             .listen('.EspHardwareCommand', (e) => {
@@ -248,10 +233,6 @@
 
     initEcho();
 
-    /**
-     * 3. SYNC STATUS VIA API
-     * Mengambil data final dari server jika status berubah jadi SELESAI
-     */
     async function syncStatus() {
         if (currentStatus === 'selesai') return;
 
@@ -264,10 +245,8 @@
             if (data.status === 'selesai') {
                 currentStatus = 'selesai';
                 
-                // Hentikan live counter
                 if (liveInterval) clearInterval(liveInterval);
 
-                // Update UI secara instan (Smooth Transition)
                 const badge = document.getElementById('statusBadge');
                 badge.className = "status-badge bg-light-success text-success transition-all";
                 badge.innerText = "SELESAI";
@@ -280,7 +259,6 @@
                 document.getElementById('durasiDisplay').innerText = data.durasi_teks;
                 document.getElementById('biayaDisplay').innerText = data.total_bayar_formatted;
 
-                // Notifikasi Sukses
                 Swal.fire({
                     icon: 'success',
                     title: 'Parkir Selesai!',

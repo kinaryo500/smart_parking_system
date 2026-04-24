@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        {{-- Header Section --}}
+
         <div class="row mb-3">
             <div class="col-12">
                 <div class="card border-0 shadow-sm rounded overflow-hidden">
@@ -28,7 +28,6 @@
             </div>
         </div>
 
-        {{-- Daftar Petugas Section --}}
         <div class="card border-0 shadow-sm rounded p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h4 class="fs-5 fw-bold mb-0">Daftar Petugas</h4>
@@ -36,8 +35,6 @@
 
             <form action="{{ route('admin.petugas.index') }}" method="GET" id="filterForm"
                 class="row g-2 mb-2 align-items-center">
-
-                {{-- SEARCH --}}
                 <div class="col-md-9">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0">
@@ -48,8 +45,6 @@
                             placeholder="Cari nama atau email..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                 </div>
-
-                {{-- FILTER STATUS --}}
                 <div class="col-md-3">
                     <select name="status" class="form-select form-select-sm bg-light" onchange="this.form.submit()">
                         <option value="">Semua Status</option>
@@ -79,16 +74,12 @@
                                 <td class="text-center small">{{ $petugas->firstItem() + $index }}</td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-
-                                    
-                                        {{-- Nama + Role --}}
                                         <div class="text-start">
                                             <div class="fw-semibold">{{ $p->name }}</div>
                                             <small class="text-muted">
                                                 {{ ucfirst($p->role) }}
                                             </small>
                                         </div>
-
                                     </div>
                                 </td>
                                 <div class="text-muted x-small d-md-none">{{ $p->email }}</div>
@@ -111,9 +102,8 @@
                                             class="btn btn-sm btn-light border text-warning" title="Edit Profil">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <form id="toggle-form-{{ $p->id }}"
-                                            action="{{ route('admin.petugas.toggle', $p->id) }}" method="POST"
-                                            class="d-inline">
+                                        <form id="toggle-form-{{ $p->id }}" action="{{ route('admin.petugas.toggle', $p->id) }}"
+                                            method="POST" class="d-inline">
                                             @csrf @method('PUT')
                                             <button type="button" onclick="confirmToggle({{ $p->id }})"
                                                 class="btn btn-sm btn-light border text-info" title="Ubah Status">
@@ -153,7 +143,6 @@
         </div>
     </div>
 
-    {{-- MODAL LAPORAN --}}
     <div class="modal fade" id="modalLaporan" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow rounded-4">
@@ -188,15 +177,11 @@
         </div>
     </div>
 
-    {{-- SweetAlert2 & Logic --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // --- Fungsi Laporan ---
         function downloadReport(type) {
             const start = document.getElementById('report_start').value;
             const end = document.getElementById('report_end').value;
-
-            // Tutup modal dulu agar tidak menghalangi loading SweetAlert
             const modalElement = document.getElementById('modalLaporan');
             const modal = bootstrap.Modal.getInstance(modalElement);
             modal.hide();
@@ -220,20 +205,17 @@
                 }
             });
         }
-
-        // --- Fungsi Search Otomatis ---
         let searchTimer;
         const searchInput = document.getElementById('searchInput');
         const filterForm = document.getElementById('filterForm');
 
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimer);
             searchTimer = setTimeout(() => {
                 filterForm.submit();
             }, 700);
         });
 
-        // --- Konfirmasi Hapus ---
         function confirmDelete(id) {
             Swal.fire({
                 title: 'Hapus Petugas?',
@@ -257,7 +239,6 @@
             });
         }
 
-        // --- Konfirmasi Toggle Status ---
         function confirmToggle(id) {
             Swal.fire({
                 title: 'Ubah Akses Petugas?',
@@ -273,7 +254,6 @@
             });
         }
 
-        // --- Notifikasi Berhasil/Gagal ---
         @if (session('success'))
             Swal.fire({
                 icon: 'success',

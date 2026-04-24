@@ -18,7 +18,6 @@
                 <div class="card border-0 shadow-sm rounded overflow-hidden">
                     <div class="card-body p-0">
                         <div class="d-flex justify-content-between align-items-center py-3 px-3">
-                            {{-- KIRI --}}
                             <div class="ms-3 flex-grow-1">
                                 <div class="text-muted small">QR validasi gate masuk.</div>
                                 <div class="fw-semibold text-dark mb-2">
@@ -117,7 +116,6 @@
         let activeTransactions = [];
         let selectedTransaksi = null;
 
-        // --- DATA FETCHING ---
         async function loadInitialData() {
             try {
                 const res = await fetch(SLOT_URL);
@@ -138,7 +136,6 @@
             renderTable();
         }
 
-        // --- RENDER UI ---
         function renderSlots() {
             const wrapper = document.getElementById('kantung-wrapper');
             const search = document.getElementById('searchPlat').value.toUpperCase();
@@ -257,7 +254,6 @@
 
             if (!confirm.isConfirmed) return;
 
-            // --- TAMPILKAN LOADING ---
             Swal.fire({
                 title: 'Memproses Pembayaran...',
                 text: 'Mohon tunggu sebentar, sedang menyiapkan nota.',
@@ -281,15 +277,10 @@
                 const result = await res.json();
 
                 if (result.success) {
-                    // Tutup Modal Bootstrap (Input Form)
                     const modalEl = document.getElementById('modalTransaksi');
                     const modalInstance = bootstrap.Modal.getInstance(modalEl);
                     if (modalInstance) modalInstance.hide();
-
-                    // Panggil fungsi print nota
                     printNota(result.data, result.settings);
-
-                    // --- TUTUP LOADING & TAMPILKAN SUKSES ---
                     Swal.fire({
                         icon: 'success',
                         title: 'Transaksi Berhasil',
@@ -307,7 +298,6 @@
                 Swal.fire('Error', 'Gagal menghubungkan ke server.', 'error');
             }
         }
-        // --- PRINT NOTA ---
         function printNota(data, settings = {}) {
             const totalMenit = parseInt(data.total_waktu) || 0;
             const durasiStr = formatDurasiTeks(totalMenit);
@@ -364,7 +354,6 @@
             printWindow.document.write(html);
             printWindow.document.close();
         }
-        // --- HELPER ---
         function formatTime(t) {
             if (!t) return '-';
             const date = new Date(t);
@@ -380,7 +369,6 @@
             return `${jam}j ${menit}m`;
         }
 
-        // --- REALTIME ---
         function listenRealtime() {
             if (typeof window.Echo === 'undefined') return;
             window.Echo.channel('parking-channel')

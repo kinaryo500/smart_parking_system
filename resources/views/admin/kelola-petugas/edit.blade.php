@@ -24,7 +24,7 @@
 
                         <form id="formEditPetugas" action="{{ route('admin.petugas.update', $petugas->id) }}" method="POST">
                             @csrf
-                            @method('PUT') {{-- Penting: Gunakan method PUT/PATCH untuk update --}}
+                            @method('PUT')
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nama Lengkap</label>
@@ -85,11 +85,10 @@
         </div>
     </div>
 
-    {{-- SweetAlert2 CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Alert jika error sistem (Try-Catch)
+
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
@@ -99,8 +98,8 @@
             });
         @endif
 
-                    // Loading saat submit
-                    const form = document.getElementById('formEditPetugas');
+
+        const form = document.getElementById('formEditPetugas');
         const btnSubmit = document.getElementById('btnSubmit');
         const btnSpinner = document.getElementById('btnSpinner');
 

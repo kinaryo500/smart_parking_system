@@ -70,7 +70,6 @@
     <input type="hidden" name="token" value="{{ $token }}">
     <input type="hidden" name="email" value="{{ request()->email }}">
 
-    {{-- PASSWORD --}}
     <div class="mb-3">
         <label class="form-label">Password Baru</label>
 
@@ -88,7 +87,6 @@
         <div id="strengthText" class="strength-text"></div>
     </div>
 
-    {{-- CONFIRM PASSWORD --}}
     <div class="mb-4">
         <label class="form-label">Konfirmasi Password</label>
 
@@ -114,7 +112,6 @@
 
 <script>
 
-// toggle password (Bootstrap Icons)
 function togglePassword(id, el) {
     const input = document.getElementById(id);
     const icon = el.querySelector("i");
@@ -130,7 +127,6 @@ function togglePassword(id, el) {
     }
 }
 
-// strength meter
 const password = document.getElementById('password');
 const bar = document.getElementById('strengthBar');
 const text = document.getElementById('strengthText');
@@ -164,7 +160,6 @@ password.addEventListener('input', function () {
     }
 });
 
-// validation
 document.getElementById('resetForm').addEventListener('submit', function (e) {
 
     let pass = document.getElementById('password').value;

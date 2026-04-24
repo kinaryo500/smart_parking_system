@@ -9,13 +9,11 @@
 
 <div style="max-width:600px; margin:30px auto; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.1);">
 
-    <!-- HEADER -->
     <div style="background:#0061ff; padding:20px; text-align:center; color:#fff;">
         <h2 style="margin:0;">Smart Parking System</h2>
         <p style="margin:5px 0 0;">Reset Password Akun Anda</p>
     </div>
 
-    <!-- BODY -->
     <div style="padding:30px; color:#333;">
 
         <h3 style="margin-top:0;">Halo</h3>
@@ -29,7 +27,6 @@
 
         <p>Silakan klik tombol di bawah ini untuk membuat password baru:</p>
 
-        <!-- BUTTON -->
         <div style="text-align:center; margin:30px 0;">
             <a href="{{ url('/reset-password/'.$token.'?email='.$email) }}"
                style="background:#0061ff; color:#fff; padding:12px 25px; text-decoration:none; border-radius:8px; display:inline-block; font-weight:bold;">
@@ -47,7 +44,6 @@
 
     </div>
 
-    <!-- FOOTER -->
     <div style="background:#f0f4ff; padding:15px; text-align:center; font-size:12px; color:#666;">
         © {{ date('Y') }} Smart Parking System
     </div>

@@ -64,7 +64,6 @@
     <div class="container mt-4 mb-5">
         <div class="card card-detail p-4 text-center" id="main-card">
 
-            {{-- ICON BERDASARKAN JENIS --}}
             <div class="mb-3">
                 @php $jenis = strtolower($transaksi->jenis_kendaraan); @endphp
 
@@ -86,7 +85,6 @@
                 </div>
             </div>
 
-            {{-- PLAT NOMOR --}}
             <div class="bg-light rounded-3 p-2 mb-3">
                 <h4 class="fw-bold mb-0" style="letter-spacing:2px">
                     {{ strtoupper($transaksi->kendaraan->plat_nomor ?? '-') }}
@@ -95,8 +93,7 @@
                     {{ $transaksi->kendaraan->merk ?? '-' }} • {{ ucfirst($transaksi->jenis_kendaraan) }}
                 </small>
             </div>
-
-            {{-- INFO GRID --}}
+       
             <div class="row g-2">
                 <div class="col-6 col-sm-4">
                     <div class="info-box">
@@ -132,7 +129,6 @@
 
             <hr class="my-4 opacity-25">
 
-            {{-- DURASI & BIAYA --}}
             <div class="py-2">
                 <small class="text-muted d-block mb-1 text-uppercase" style="font-size:0.7rem;">
                     Durasi Parkir
@@ -177,7 +173,6 @@
         let statusSekarang = "{{ $transaksi->status }}";
         let liveInterval;
 
-        // --- 1. LIVE COUNTER (Dijalankan jika status masih AKTIF) ---
         function startLiveCounter() {
             const start = new Date("{{ $transaksi->waktu_masuk }}").getTime();
             const tarif = {{ $transaksi->tarif_per_jam }};
@@ -192,7 +187,6 @@
                 document.getElementById('durasiDisplay').innerText =
                     jam > 0 ? `${jam} jam ${sisa} menit` : `${menit} menit`;
 
-                // Hitung estimasi (minimal 1 jam)
                 const tagihanJam = Math.max(1, Math.ceil(menit / 60));
                 const total = tagihanJam * tarif;
                 document.getElementById('biayaDisplay').innerText = total.toLocaleString('id-ID');
@@ -203,7 +197,6 @@
             startLiveCounter();
         }
 
-        // --- 2. REALTIME LISTENER ---
         function initEcho() {
             if (typeof window.Echo !== 'undefined') {
                 // Dengarkan channel khusus ID transaksi ini
@@ -218,9 +211,8 @@
         }
         initEcho();
 
-        // --- 3. SYNC STATUS KE DATABASE ---
         async function syncStatus() {
-            if (statusSekarang === 'selesai') return; // Stop jika sudah selesai
+            if (statusSekarang === 'selesai') return;
 
             try {
                 const response = await fetch(`/transaksi/status/${transaksiId}`);
@@ -230,17 +222,13 @@
                     statusSekarang = 'selesai';
                     if (liveInterval) clearInterval(liveInterval);
 
-                    // Update Visual Status
                     const badge = document.getElementById('statusBadge');
                     badge.className = "status-badge bg-light-success text-success";
                     badge.innerText = "SELESAI";
 
-                    // Update Box Biaya
                     const biayaBox = document.getElementById('biayaBox');
                     biayaBox.className = "mt-4 p-4 rounded-4 bg-success text-white";
                     document.getElementById('biayaLabel').innerText = "TOTAL PEMBAYARAN";
-
-                    // Update Data
                     document.getElementById('jamKeluar').innerText = data.waktu_keluar;
                     document.getElementById('durasiDisplay').innerText = data.durasi_teks;
                     document.getElementById('biayaDisplay').innerText = data.total_bayar_formatted;

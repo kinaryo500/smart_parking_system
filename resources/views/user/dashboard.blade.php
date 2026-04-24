@@ -3,7 +3,6 @@
 
 @push('styles')
 <style>
-    /* Styling Floating Action Button */
     .fab {
         position: fixed;
         bottom: 90px; 
@@ -30,13 +29,11 @@
     }
     .parkir-card:active { transform: scale(0.98); }
 
-    /* Custom Style untuk Form di dalam Modal */
     .bg-light-custom {
         background-color: #f8f9fa;
         border-radius: 15px;
     }
 
-    /* Efek disabled saat loading */
     .loading-overlay {
         pointer-events: none;
         opacity: 0.6;
@@ -190,9 +187,6 @@
 
 @push('scripts')
 <script>
-    /**
-     * TIMER REALTIME DASHBOARD
-     */
     function updateAllTimers() {
         document.querySelectorAll('.parkir-card').forEach(card => {
             const startStr = card.dataset.start;
@@ -223,10 +217,6 @@
 
     setInterval(updateAllTimers, 1000);
     updateAllTimers();
-
-    /**
-     * LOGIKA FORM & AJAX SUBMIT
-     */
     const tarifMap = {
         @foreach($tarifs as $t)
             "{{ strtolower($t->nama) }}": {{ $t->tarif_per_jam }},
@@ -247,7 +237,7 @@
     const formParkir = document.getElementById('formParkir');
     const modalBody = document.getElementById('modalBodyContainer');
 
-    // Saling reset antara select dan manual input
+
     selectKen?.addEventListener('change', function() {
         if (this.value) {
             inputJenis.value = ""; inputPlat.value = "";
@@ -263,7 +253,6 @@
         }
     });
 
-    // AJAX SUBMIT
     formParkir?.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -293,7 +282,6 @@
         const formData = new FormData(formParkir);
         const btnSubmit = document.getElementById('btnSubmit');
 
-        // UI Loading State
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Loading...`;
         modalBody.classList.add('loading-overlay');
@@ -320,7 +308,6 @@
                 throw new Error(data.message || 'Terjadi kesalahan sistem');
             }
             
-            // Success
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil',
@@ -332,7 +319,6 @@
             });
         })
         .catch(error => {
-            // Error Handling: Modal Tetap Terbuka
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal',

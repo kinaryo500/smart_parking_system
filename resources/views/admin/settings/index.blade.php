@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <div class="container">
-        {{-- HEADER --}}
         <div class="row mb-3">
             <div class="col-12">
                 <div class="card border-0 shadow-sm rounded overflow-hidden">
@@ -23,12 +22,10 @@
             </div>
         </div>
 
-        {{-- FORM --}}
         <div class="card border-0 shadow-sm rounded p-4">
             <div id="errorBox" class="alert alert-danger d-none"></div>
             
             <div class="row">
-                {{-- KOLOM KIRI: INPUT DATA --}}
                 <div class="col-md-6 d-flex flex-column">
                     <div class="mb-3">
                         <label class="fw-semibold">Nama Aplikasi</label>
@@ -60,8 +57,6 @@
                             <input type="text" id="longitude" class="form-control" disabled>
                         </div>
                     </div>
-
-                    {{-- ACTION BUTTON --}}
                     <div class="mt-4 d-flex justify-content-end gap-2">
                         <button id="btnCancel" onclick="cancelEdit()" class="btn btn-secondary d-none px-4">
                             <i class="bi bi-x-circle me-1"></i>Batal
@@ -73,7 +68,6 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN: MAP --}}
                 <div class="col-md-6">
                     <label class="fw-semibold">Lokasi Map</label>
                     <div id="map" style="height:410px; border-radius:12px; border: 1px solid #dee2e6; z-index: 1;"></div>
@@ -95,7 +89,6 @@
         let marker;
         let editMode = false;
 
-        // Mendapatkan data awal
         async function loadSetting() {
             try {
                 const res = await fetch(GET_API);
@@ -116,7 +109,6 @@
             }
         }
 
-        // Inisialisasi Map
         function initMap(lat, lng) {
             lat = parseFloat(lat) || -8.5203;
             lng = parseFloat(lng) || 140.4185;
@@ -140,7 +132,6 @@
 
             marker = L.marker([lat, lng], { draggable: false }).addTo(map);
 
-            // Event klik map
             map.on('click', function (e) {
                 if (!editMode) return;
                 let newLat = e.latlng.lat;
@@ -150,20 +141,15 @@
                 longitude.value = newLng;
             });
 
-            // Pastikan map dirender dengan benar
             setTimeout(() => { map.invalidateSize(); }, 400);
         }
 
-        // Fungsi Toggle Mode Edit
         function toggleEdit() {
             editMode = !editMode;
             
-            // Toggle Disabled Input
             document.querySelectorAll('input').forEach(i => {
                 i.disabled = !editMode;
             });
-
-            // Toggle Draggable Marker
             if (marker.dragging) {
                 editMode ? marker.dragging.enable() : marker.dragging.disable();
             }
@@ -172,14 +158,12 @@
             let btnCancel = document.getElementById('btnCancel');
 
             if (editMode) {
-                // Berubah ke mode simpan
                 btn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan';
                 btn.classList.replace('btn-primary', 'btn-success');
                 btn.onclick = confirmSave;
                 
                 btnCancel.classList.remove('d-none');
             } else {
-                // Berubah ke mode edit
                 btn.innerHTML = '<i class="bi bi-pencil me-2"></i>Edit';
                 btn.classList.replace('btn-success', 'btn-primary');
                 btn.onclick = toggleEdit;
@@ -188,12 +172,9 @@
             }
         }
 
-        // Fungsi Batal Edit
+
         function cancelEdit() {
-            // Muat ulang data asal
             loadSetting();
-            
-            // Matikan mode edit
             editMode = true; 
             toggleEdit();
         }

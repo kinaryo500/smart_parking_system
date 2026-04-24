@@ -23,7 +23,6 @@
                     </div>
                     <div class="card-body p-4">
 
-                        {{-- Form Start --}}
                         <form id="formCreatePetugas" action="{{ route('admin.petugas.store') }}" method="POST">
                             @csrf
 
@@ -81,11 +80,9 @@
         </div>
     </div>
 
-    {{-- SweetAlert2 CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // 1. Tampilkan Alert jika Try-Catch di Controller gagal
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
@@ -95,8 +92,8 @@
             });
         @endif
 
-                    // 2. Loading state saat form dikirim
-                    const form = document.getElementById('formCreatePetugas');
+         
+        const form = document.getElementById('formCreatePetugas');
         const btnSubmit = document.getElementById('btnSubmit');
         const btnSpinner = document.getElementById('btnSpinner');
 

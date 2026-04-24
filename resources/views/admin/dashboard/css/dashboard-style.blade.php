@@ -34,7 +34,7 @@
             text-transform: uppercase;
         }
 
-        /* Slot Grid Styling */
+
         .kantung {
             background: #ffffff;
             border-radius: 10px;

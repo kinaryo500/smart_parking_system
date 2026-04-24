@@ -1,14 +1,11 @@
 <nav class="top-navbar shadow-sm d-flex justify-content-between align-items-center px-3 py-2">
 
-    {{-- TOGGLE SIDEBAR --}}
     <button class="btn btn-white border shadow-sm" id="toggleSidebar">
         <i class="bi bi-list"></i>
     </button>
 
-    {{-- PROFILE DROPDOWN --}}
     <div class="dropdown d-flex align-items-center gap-3">
 
-        {{-- INFO USER --}}
         <div class="text-end d-none d-sm-block">
             <p class="mb-0 fw-bold small">{{ auth()->user()->name }}</p>
             <p class="mb-0 text-success fw-bold" style="font-size: 10px;">
@@ -16,7 +13,7 @@
             </p>
         </div>
 
-        {{-- AVATAR --}}
+
         <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=2563eb&color=fff"
             class="rounded-circle border dropdown-toggle"
             width="40"
@@ -25,10 +22,9 @@
             aria-expanded="false"
             alt="Avatar">
 
-        {{-- DROPDOWN MENU --}}
+
         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
 
-            {{-- USER INFO --}}
             <li class="px-3 py-2">
                 <div class="fw-bold">{{ auth()->user()->name }}</div>
                 <small class="text-muted text-uppercase">{{ auth()->user()->role }}</small>
@@ -36,7 +32,6 @@
 
             <li><hr class="dropdown-divider"></li>
 
-            {{-- PROFILE --}}
             <li>
                 <a class="dropdown-item d-flex align-items-center gap-2"
                    href="{{ route('profile.index') }}">
@@ -44,7 +39,6 @@
                 </a>
             </li>
 
-            {{-- LOGOUT --}}
             <li>
                 <button onclick="confirmLogout()"
                     class="dropdown-item text-danger d-flex align-items-center gap-2">
@@ -57,7 +51,7 @@
     </div>
 </nav>
 
-{{-- SWEETALERT --}}
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -82,7 +76,7 @@ function confirmLogout() {
                 didOpen: () => Swal.showLoading()
             });
 
-            // submit form logout
+
             let form = document.createElement('form');
             form.method = 'POST';
             form.action = "{{ route('logout') }}";

@@ -197,8 +197,6 @@
             try {
                 const res = await fetch(url);
                 const result = await res.json();
-
-                // 1. Update Global Summary (Rupiah & Count)
                 document.getElementById('hariIni').innerText = format(result.summary.hari_ini);
                 document.getElementById('countHariIni').innerText = result.summary.count_hari_ini || 0;
 
@@ -207,12 +205,8 @@
 
                 document.getElementById('bulanIni').innerText = format(result.summary.bulan_ini);
                 document.getElementById('countBulanIni').innerText = result.summary.count_bulan_ini || 0;
-
-                // 2. Update Filter Result
                 document.getElementById('totalFilter').innerText = format(result.summary_filter.total_filter);
                 document.getElementById('countTrx').innerText = result.summary_filter.count_filter || 0;
-
-                // 3. Render Table & Pagination
                 renderTable(result.data);
                 renderPagination(result.meta);
             } catch (error) {

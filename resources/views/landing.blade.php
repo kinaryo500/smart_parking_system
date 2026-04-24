@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Smart Parking System | Solusi Modern</title>
+    <title>Smart Parking System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="manifest" href="/manifest.json">
@@ -32,7 +32,6 @@
             min-height: 100vh;
         }
 
-        /* FLOATING BACKGROUND EFFECT */
         body::before {
             content: "";
             position: fixed;
@@ -59,7 +58,6 @@
             z-index: -1;
         }
 
-        /* PRELOADER FIX */
         #preloader {
             position: fixed;
             inset: 0;
@@ -88,7 +86,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* NAVBAR */
         .navbar {
             backdrop-filter: blur(18px);
             background: rgba(255,255,255,.7) !important;
@@ -96,7 +93,6 @@
             padding: 18px 0;
         }
 
-        /* HERO */
         .hero {
             min-height: 100vh;
             display: flex;

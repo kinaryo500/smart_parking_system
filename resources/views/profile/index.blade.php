@@ -112,7 +112,6 @@
 
 </div>
 
-{{-- STYLE --}}
 <style>
 .password-wrapper { position: relative; }
 .toggle-password {
@@ -133,7 +132,6 @@
 const UPDATE_API = "{{ route('profile.update') }}";
 const PASSWORD_API = "{{ route('profile.change-password') }}";
 
-/* ================= EDIT PROFILE ================= */
 
 let editMode = false;
 
@@ -188,7 +186,6 @@ async function saveProfile() {
 
     let data = {};
 
-    // 🔥 hanya kirim yang berubah
     Object.keys(current).forEach(key => {
         if (current[key] !== original[key]) {
             data[key] = current[key];
@@ -245,7 +242,6 @@ async function saveProfile() {
     }
 }
 
-/* ================= PASSWORD ================= */
 
 function openPasswordModal(){
     new bootstrap.Modal(document.getElementById('passwordModal')).show();
@@ -264,7 +260,7 @@ function togglePassword(id,el){
     }
 }
 
-/* strength meter */
+
 new_password.addEventListener('input',function(){
     let val=this.value;
     let s=0;
