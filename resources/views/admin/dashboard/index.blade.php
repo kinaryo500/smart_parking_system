@@ -175,27 +175,27 @@
                     const icon = s.jenis === 'motor' ? 'motorcycle' : 'directions_car';
 
                     slotHtml += `
-                        <div class="slot ${statusClass}" style="cursor:default">
-                            <span class="kode-slot">${s.kode}</span>
-                            <span class="material-icons">${icon}</span>
-                            <div class="plat-info mt-1">
-                                ${s.status === 'terisi'
-                                    ? `<strong class="d-block" style="font-size:0.8rem">TERISI</strong>`
-                                    : `<span class="small">KOSONG</span>`}
-                            </div>
-                        </div>`;
+                            <div class="slot ${statusClass}" style="cursor:default">
+                                <span class="kode-slot">${s.kode}</span>
+                                <span class="material-icons">${icon}</span>
+                                <div class="plat-info mt-1">
+                                    ${s.status === 'terisi'
+                            ? `<strong class="d-block" style="font-size:0.8rem">TERISI</strong>`
+                            : `<span class="small">KOSONG</span>`}
+                                </div>
+                            </div>`;
                 });
 
                 html += `
-                    <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                            <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
-                            <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
-                        </div>
-                        <div class="card-body bg-light-subtle">
-                            <div class="slot-grid">${slotHtml}</div>
-                        </div>
-                    </div>`;
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
+                                <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
+                            </div>
+                            <div class="card-body bg-light-subtle">
+                                <div class="slot-grid">${slotHtml}</div>
+                            </div>
+                        </div>`;
             });
             wrapper.innerHTML = html;
         }
@@ -213,17 +213,17 @@
             activeTransactions.forEach(t => {
                 if (search && !t.plat.toUpperCase().includes(search)) return;
                 html += `
-                    <tr>
-                        <td class="ps-3 fw-bold">${t.plat}</td>
-                        <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
-                        <td>${t.masuk}</td>
-                        <td>${t.total_waktu} Menit</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary px-3" onclick="openModal(${t.id})">
-                                <i class="bi bi-box-arrow-right me-1"></i> Keluar
-                            </button>
-                        </td>
-                    </tr>`;
+                        <tr>
+                            <td class="ps-3 fw-bold">${t.plat}</td>
+                            <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
+                            <td>${t.masuk}</td>
+                            <td>${t.total_waktu} Menit</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary px-3" onclick="openModal(${t.id})">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                                </button>
+                            </td>
+                        </tr>`;
             });
             tbody.innerHTML = html;
         }
@@ -231,7 +231,7 @@
         // MQTT Direct Logic
         function listenRealtime() {
             // Menggunakan WSS port 8884 untuk HiveMQ Public Broker
-            const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt'; 
+            const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
             const options = {
                 clientId: 'web_dashboard_' + Math.random().toString(16).substr(2, 8),
                 clean: true,
@@ -250,12 +250,12 @@
                 try {
                     const payload = JSON.parse(message.toString());
                     console.log("[MQTT] New Data:", payload);
-                    
+
                     // Langsung update visual slot
                     updateSlotsDirectly(payload);
-                    
+
                     // Tetap sync ke DB untuk update tabel transaksi
-                    loadInitialData(); 
+                    loadInitialData();
                 } catch (e) {
                     console.error("[MQTT] Parse error:", e);
                 }
@@ -277,8 +277,8 @@
                 });
             }
             // Sortir kode agar urut A1, A2, dst
-            processed.sort((a, b) => a.kode.localeCompare(b.kode, undefined, {numeric: true}));
-            
+            processed.sort((a, b) => a.kode.localeCompare(b.kode, undefined, { numeric: true }));
+
             localAreas = [{ nama: 'AREA PARKIR (LIVE)', kapasitas: processed.length, slot: processed }];
             renderSlots();
         }
@@ -291,7 +291,7 @@
             document.getElementById('m_plat').innerText = trx.plat;
             document.getElementById('m_jenis').innerText = trx.jenis;
             document.getElementById('m_masuk').innerText = formatTime(trx.waktu_masuk);
-            
+
             const tarifPerJam = trx.tarif ?? 0;
             document.getElementById('m_tarif').innerText = 'Rp ' + formatRupiah(tarifPerJam);
 
@@ -341,36 +341,97 @@
         }
 
         function printNota(data, settings = {}) {
+            const totalMenit = parseInt(data.total_waktu) || 0;
+            const durasiStr = formatDurasiTeks(totalMenit);
             const printWindow = window.open('', '_blank', 'width=400,height=600');
-            if (!printWindow) return;
+
+            if (!printWindow) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pop-up Diblokir',
+                    text: 'Nota tidak dapat terbuka otomatis. Silakan izinkan pop-up.',
+                });
+                return;
+            }
+
             const html = `
-                <html><head><style>
-                    @page { size: 58mm auto; margin: 0; }
-                    body { font-family: 'Courier New', monospace; width: 48mm; margin: 0 auto; padding: 10px; font-size: 11px; }
-                    .center { text-align: center; } .bold { font-weight: bold; } .line { border-top: 1px dashed #000; margin: 5px 0; }
-                </style></head><body>
-                    <div class="center bold">${(settings.app_name || 'PARKING').toUpperCase()}</div>
-                    <div class="line"></div>
-                    <div>Plat: ${data.plat_nomor}</div>
-                    <div>Durasi: ${formatDurasiTeks(data.total_waktu)}</div>
-                    <div class="bold">TOTAL: Rp ${formatRupiah(data.total_bayar)}</div>
-                    <div class="line"></div>
-                    <div class="center">Terima Kasih</div>
-                    <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 500); }<\/script>
-                </body></html>`;
+                    <html>
+                    <head>
+                        <title>Print Nota - ${data.nomor_transaksi || 'Parking'}</title>
+                        <style>
+                            @page { size: 58mm auto; margin: 0; }
+                            body {
+                                font-family: 'Courier New', Courier, monospace;
+                                width: 48mm;
+                                margin: 0 auto;
+                                padding: 10px 0;
+                                font-size: 12px;
+                                line-height: 1.2;
+                                color: #000;
+                            }
+                            .center { text-align: center; }
+                            .bold { font-weight: bold; }
+                            .line { border-top: 1px dashed #000; margin: 5px 0; }
+                            .mb-1 { margin-bottom: 2px; }
+                            .flex { display: flex; justify-content: space-between; }
+                            table { width: 100%; border-collapse: collapse; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="center bold" style="font-size: 14px;">
+                            ${(settings.app_name || 'SMART PARKING').toUpperCase()}
+                        </div>
+                        <div class="center mb-1">${settings.app_address || 'Sistem Parkir Otomatis'}</div>
+
+                        <div class="line"></div>
+
+                        <div class="flex"><span>ID:</span> <span>#${data.id}</span></div>
+                        <div class="flex"><span>Tgl:</span> <span>${new Date().toLocaleDateString('id-ID')}</span></div>
+
+                        <div class="line"></div>
+
+                        <div class="mb-1"><span class="bold">PLAT:</span> ${data.plat_nomor}</div>
+                        <div class="mb-1"><span>JNS :</span> ${data.jenis_kendaraan || '-'}</div>
+                        <div class="mb-1"><span>MASUK:</span> ${formatTime(data.waktu_masuk)}</div>
+                        <div class="mb-1"><span>KELUAR:</span> ${formatTime(data.waktu_keluar)}</div>
+                        <div class="mb-1"><span>DURASI:</span> ${durasiStr}</div>
+
+                        <div class="line"></div>
+
+                        <div class="flex bold" style="font-size: 13px;">
+                            <span>TOTAL:</span>
+                            <span>Rp ${formatRupiah(data.total_bayar)}</span>
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="center" style="font-size: 10px; margin-top: 10px;">
+                            TERIMA KASIH ATAS KUNJUNGAN ANDA<br>
+                            SIMPAN NOTA INI SEBAGAI BUKTI
+                        </div>
+
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(() => { window.close(); }, 500);
+                            }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+
             printWindow.document.write(html);
             printWindow.document.close();
         }
-
         function formatTime(t) {
             if (!t) return '-';
             const date = new Date(t);
-            return date.toLocaleDateString('id-ID') + ' ' + date.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+            return date.toLocaleDateString('id-ID') + ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         }
 
         function formatRupiah(n) { return new Intl.NumberFormat('id-ID').format(n); }
 
-        function formatDurasiTeks(m) { return `${Math.floor(m/60)}j ${m%60}m`; }
+        function formatDurasiTeks(m) { return `${Math.floor(m / 60)}j ${m % 60}m`; }
 
         async function loadQR() {
             try {
@@ -379,7 +440,7 @@
                     document.getElementById("qr-container").innerHTML = data.svg;
                     document.getElementById("qr-code-text").innerText = data.kode ?? '-';
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
