@@ -9,7 +9,7 @@
                 <div class="card border-0 shadow-sm rounded overflow-hidden">
                     <div class="card-header bg-primary-subtle py-3">
                         <h4 class="fw-bold mb-1 text-dark">Monitoring Parkir</h4>
-                        <p class="text-muted small mb-0">Sistem Parkir Realtime (Pusher + MQTT Mode)</p>
+                        <p class="text-muted small mb-0">Sistem Parkir Realtime (Direct MQTT Mode)</p>
                     </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@
         <div id="kantung-wrapper" class="mb-2">
             <div class="text-center py-5">
                 <div class="spinner-border text-primary"></div>
-                <p class="text-muted mt-2">Menghubungkan ke Sistem Realtime...</p>
+                <p class="text-muted mt-2">Menghubungkan ke Broker MQTT...</p>
             </div>
         </div>
 
@@ -105,6 +105,7 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- Library MQTT.js untuk koneksi langsung --}}
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
     <script>
@@ -136,14 +137,13 @@
             if (isLoading) return;
             isLoading = true;
             try {
-                console.log("[AJAX] Fetching latest database state...");
                 const data = await fetchJSON(SLOT_URL);
                 localAreas = data.areas || [];
                 activeTransactions = data.active_transactions || [];
                 renderSlots();
                 renderTable();
             } catch (e) {
-                console.error("[AJAX] Gagal sinkronisasi", e);
+                console.error("Gagal sinkronisasi data database", e);
             } finally {
                 isLoading = false;
             }
@@ -175,27 +175,27 @@
                     const icon = s.jenis === 'motor' ? 'motorcycle' : 'directions_car';
 
                     slotHtml += `
-                                <div class="slot ${statusClass}" style="cursor:default">
-                                    <span class="kode-slot">${s.kode}</span>
-                                    <span class="material-icons">${icon}</span>
-                                    <div class="plat-info mt-1">
-                                        ${s.status === 'terisi'
+                            <div class="slot ${statusClass}" style="cursor:default">
+                                <span class="kode-slot">${s.kode}</span>
+                                <span class="material-icons">${icon}</span>
+                                <div class="plat-info mt-1">
+                                    ${s.status === 'terisi'
                             ? `<strong class="d-block" style="font-size:0.8rem">TERISI</strong>`
                             : `<span class="small">KOSONG</span>`}
-                                    </div>
-                                </div>`;
+                                </div>
+                            </div>`;
                 });
 
                 html += `
-                            <div class="card border-0 shadow-sm mb-3">
-                                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                                    <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
-                                    <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
-                                </div>
-                                <div class="card-body bg-light-subtle">
-                                    <div class="slot-grid">${slotHtml}</div>
-                                </div>
-                            </div>`;
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
+                                <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
+                            </div>
+                            <div class="card-body bg-light-subtle">
+                                <div class="slot-grid">${slotHtml}</div>
+                            </div>
+                        </div>`;
             });
             wrapper.innerHTML = html;
         }
@@ -213,44 +213,24 @@
             activeTransactions.forEach(t => {
                 if (search && !t.plat.toUpperCase().includes(search)) return;
                 html += `
-                            <tr>
-                                <td class="ps-3 fw-bold">${t.plat}</td>
-                                <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
-                                <td>${t.masuk}</td>
-                                <td>${t.total_waktu} Menit</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-primary px-3" onclick="openModal(${t.id})">
-                                        <i class="bi bi-box-arrow-right me-1"></i> Keluar
-                                    </button>
-                                </td>
-                            </tr>`;
+                        <tr>
+                            <td class="ps-3 fw-bold">${t.plat}</td>
+                            <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
+                            <td>${t.masuk}</td>
+                            <td>${t.total_waktu} Menit</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary px-3" onclick="openModal(${t.id})">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                                </button>
+                            </td>
+                        </tr>`;
             });
             tbody.innerHTML = html;
         }
 
-        function initPusher() {
-            if (typeof window.Echo !== 'undefined') {
-                console.log("[PUSHER] Listening on parking-channel...");
-                window.Echo.channel('parking-channel')
-                    .listen('.TransaksiChanged', (e) => {
-                        console.log("[PUSHER] Event TransaksiChanged diterima. Fetching data...");
-                        loadInitialData();
-                    })
-                    .listen('.SlotUpdated', (e) => {
-                        console.log("[PUSHER] Event SlotUpdated diterima.");
-                        loadInitialData();
-                    })
-                    .listen('.QRUpdated', (e) => {
-                        console.log("[PUSHER] Event QRUpdated diterima.");
-                        loadQR();
-                    });
-            } else {
-                console.warn("[PUSHER] Echo not found, retrying...");
-                setTimeout(initPusher, 1000);
-            }
-        }
-
+        // MQTT Direct Logic
         function listenRealtime() {
+            // Menggunakan WSS port 8884 untuk HiveMQ Public Broker
             const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
             const options = {
                 clientId: 'web_dashboard_' + Math.random().toString(16).substr(2, 8),
@@ -258,23 +238,31 @@
                 connectTimeout: 5000,
             };
 
-            console.log("[MQTT] Connecting to HiveMQ...");
+            console.log("[MQTT] Connecting to HiveMQ via WebSockets...");
             const client = mqtt.connect(brokerUrl, options);
 
             client.on('connect', () => {
-                console.log("[MQTT] Connected.");
+                console.log("[MQTT] Connected successfully!");
                 client.subscribe('smartparking/univ123/slots');
             });
 
             client.on('message', (topic, message) => {
                 try {
                     const payload = JSON.parse(message.toString());
-                    console.log("[MQTT] New Payload:", payload);
+                    console.log("[MQTT] New Data:", payload);
+
+                    // Langsung update visual slot
                     updateSlotsDirectly(payload);
-                    // MQTT memicu visual instan, Pusher akan memicu refresh database untuk akurasi data
+
+                    // Tetap sync ke DB untuk update tabel transaksi
+                    loadInitialData();
                 } catch (e) {
-                    console.error("[MQTT] Error", e);
+                    console.error("[MQTT] Parse error:", e);
                 }
+            });
+
+            client.on('error', (err) => {
+                console.error("[MQTT] Connection error:", err);
             });
         }
 
@@ -288,7 +276,9 @@
                     plat: data.status === 'terisi' ? 'OCCUPIED' : '-',
                 });
             }
+            // Sortir kode agar urut A1, A2, dst
             processed.sort((a, b) => a.kode.localeCompare(b.kode, undefined, { numeric: true }));
+
             localAreas = [{ nama: 'AREA PARKIR (LIVE)', kapasitas: processed.length, slot: processed }];
             renderSlots();
         }
@@ -354,42 +344,85 @@
             const totalMenit = parseInt(data.total_waktu) || 0;
             const durasiStr = formatDurasiTeks(totalMenit);
             const printWindow = window.open('', '_blank', 'width=400,height=600');
-            if (!printWindow) return;
+
+            if (!printWindow) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pop-up Diblokir',
+                    text: 'Nota tidak dapat terbuka otomatis. Silakan izinkan pop-up.',
+                });
+                return;
+            }
 
             const html = `
-                        <html>
-                        <head>
-                            <style>
-                                @page { size: 58mm auto; margin: 0; }
-                                body { font-family: 'Courier New', monospace; width: 48mm; margin: 0 auto; padding: 10px 0; font-size: 12px; }
-                                .center { text-align: center; }
-                                .bold { font-weight: bold; }
-                                .line { border-top: 1px dashed #000; margin: 5px 0; }
-                                .flex { display: flex; justify-content: space-between; }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="center bold">${(settings.app_name || 'SMART PARKING').toUpperCase()}</div>
-                            <div class="center">${settings.app_address || 'Sistem Parkir Otomatis'}</div>
-                            <div class="line"></div>
-                            <div class="flex"><span>ID:</span> <span>#${data.id}</span></div>
-                            <div class="line"></div>
-                            <div class="bold">PLAT: ${data.plat_nomor}</div>
-                            <div>MASUK: ${formatTime(data.waktu_masuk)}</div>
-                            <div>KELUAR: ${formatTime(data.waktu_keluar)}</div>
-                            <div>DURASI: ${durasiStr}</div>
-                            <div class="line"></div>
-                            <div class="flex bold"><span>TOTAL:</span> <span>Rp ${formatRupiah(data.total_bayar)}</span></div>
-                            <div class="line"></div>
-                            <div class="center" style="font-size: 10px;">TERIMA KASIH</div>
-                            <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 500); }<\/script>
-                        </body>
-                        </html>
-                    `;
+                    <html>
+                    <head>
+                        <title>Print Nota - ${data.nomor_transaksi || 'Parking'}</title>
+                        <style>
+                            @page { size: 58mm auto; margin: 0; }
+                            body {
+                                font-family: 'Courier New', Courier, monospace;
+                                width: 48mm;
+                                margin: 0 auto;
+                                padding: 10px 0;
+                                font-size: 12px;
+                                line-height: 1.2;
+                                color: #000;
+                            }
+                            .center { text-align: center; }
+                            .bold { font-weight: bold; }
+                            .line { border-top: 1px dashed #000; margin: 5px 0; }
+                            .mb-1 { margin-bottom: 2px; }
+                            .flex { display: flex; justify-content: space-between; }
+                            table { width: 100%; border-collapse: collapse; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="center bold" style="font-size: 14px;">
+                            ${(settings.app_name || 'SMART PARKING').toUpperCase()}
+                        </div>
+                        <div class="center mb-1">${settings.app_address || 'Sistem Parkir Otomatis'}</div>
+
+                        <div class="line"></div>
+
+                        <div class="flex"><span>ID:</span> <span>#${data.id}</span></div>
+                        <div class="flex"><span>Tgl:</span> <span>${new Date().toLocaleDateString('id-ID')}</span></div>
+
+                        <div class="line"></div>
+
+                        <div class="mb-1"><span class="bold">PLAT:</span> ${data.plat_nomor}</div>
+                        <div class="mb-1"><span>JNS :</span> ${data.jenis_kendaraan || '-'}</div>
+                        <div class="mb-1"><span>MASUK:</span> ${formatTime(data.waktu_masuk)}</div>
+                        <div class="mb-1"><span>KELUAR:</span> ${formatTime(data.waktu_keluar)}</div>
+                        <div class="mb-1"><span>DURASI:</span> ${durasiStr}</div>
+
+                        <div class="line"></div>
+
+                        <div class="flex bold" style="font-size: 13px;">
+                            <span>TOTAL:</span>
+                            <span>Rp ${formatRupiah(data.total_bayar)}</span>
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="center" style="font-size: 10px; margin-top: 10px;">
+                            TERIMA KASIH ATAS KUNJUNGAN ANDA<br>
+                            SIMPAN NOTA INI SEBAGAI BUKTI
+                        </div>
+
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(() => { window.close(); }, 500);
+                            }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+
             printWindow.document.write(html);
             printWindow.document.close();
         }
-
         function formatTime(t) {
             if (!t) return '-';
             const date = new Date(t);
@@ -397,13 +430,13 @@
         }
 
         function formatRupiah(n) { return new Intl.NumberFormat('id-ID').format(n); }
+
         function formatDurasiTeks(m) { return `${Math.floor(m / 60)}j ${m % 60}m`; }
 
         async function loadQR() {
             try {
                 const data = await fetchJSON(QR_URL);
                 if (data.success) {
-                    console.log("[AJAX] QR Code updated.");
                     document.getElementById("qr-container").innerHTML = data.svg;
                     document.getElementById("qr-code-text").innerText = data.kode ?? '-';
                 }
@@ -413,8 +446,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadInitialData();
             loadQR();
-            listenRealtime();
-            initPusher();
+            listenRealtime(); // MQTT Direct aktif
+            setInterval(loadQR, 30000); // Refresh QR tiap 30 detik
         });
     </script>
 @endpush

@@ -141,6 +141,7 @@ class AdminDashboardController extends Controller
             }
 
             DB::commit();
+            event(new \App\Events\TransaksiChanged());
 
             return response()->json([
                 'success'     => true,
