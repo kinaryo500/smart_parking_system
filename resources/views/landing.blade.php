@@ -62,7 +62,7 @@
             position: fixed;
             inset: 0;
             width: 100%;
-            height: 100dvh; /* FIX MOBILE VH BUG */
+            height: 100dvh;
             background: #fff;
             display: flex;
             align-items: center;
@@ -192,7 +192,7 @@
         <div class="hero-card" data-aos="fade-up">
             <h1 class="mb-3">Sistem Parkir Modern</h1>
             <p class="mb-4">
-                Kelola akses & slot parkir secara otomatis, cepat, dan berbasis cloud.
+                Kelola akses & slot parkir secara otomatis.
             </p>
 
             <div class="d-flex justify-content-center gap-3 flex-wrap">
