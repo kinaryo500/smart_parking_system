@@ -481,15 +481,18 @@
                                     ${settings.lokasi_parkir ?? '-'}
                                 </div>
 
-                                <div class="center" style="font-size:10px;">
+                                <div class="center" style="font-size:10px; min-width: 100px:">
                                     ${settings.alamat ?? '-'}
+                                </div>
+                                <div class="center" style="font-size:10px;">
+                                    ${settings.kontak ?? '-'}
                                 </div>
 
                                 <div class="line"></div>
 
                                 <div class="row">
-                                    <span>No Transaksi</span>
-                                    <span>#${data.id}</span>
+                                    <span>Kode Transaksi</span>
+                                    <span>#${data.kode_qr}</span>
                                 </div>
 
                                 <div class="row">
@@ -501,7 +504,7 @@
 
                                 <div class="box">
                                     <div class="row"><span>PLAT</span><span class="bold">${data.plat_nomor}</span></div>
-                                    <div class="row"><span>JENIS</span><span>${data.jenis_kendaraan}</span></div>
+                                    <div class="row"><span>JENIS</span><span>${data.jenis}</span></div>
                                 </div>
 
                                 <div class="line"></div>

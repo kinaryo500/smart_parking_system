@@ -35,7 +35,7 @@ class CetakNotaController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'id'            => $trx->id,
+                    'kode_qr'       => $trx->qrParkir->kode ?? '-',
                     'plat_nomor'    => $trx->kendaraan->plat_nomor ?? '-',
                     'jenis'         => $trx->jenis_kendaraan,
                     'waktu_masuk'   => $trx->waktu_masuk,

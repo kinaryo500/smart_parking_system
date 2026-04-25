@@ -32,15 +32,16 @@ class PetugasDashboardController extends Controller
 
             $processedSlots = [];
             foreach ($slotsFromEsp as $kode => $dataEsp) {
-                $statusRaw = $dataEsp['status'] ?? 'kosong';
-                $isOccupied = ($statusRaw == '1' || $statusRaw === true || $statusRaw == 'terisi');
+                $statusRaw = strtolower(trim((string) ($dataEsp['status'] ?? 'kosong')));
+
+                $isOccupied = in_array($statusRaw, ['1', 'true', 'occupied', 'terisi'], true);
                 $statusFisik = $isOccupied ? 'terisi' : 'kosong';
 
                 $processedSlots[] = [
                     'kode'       => strtoupper(str_replace('slot_', '', $kode)),
                     'status'     => $statusFisik,
                     'jenis'      => $dataEsp['jenis'] ?? 'mobil',
-                    'plat'       => $statusFisik === 'terisi' ? 'OCCUPIED' : '-',
+                    'plat'       => $statusFisik === 'terisi' ? 'TERISI' : '-',
                     'updated_at' => now()->format('H:i:s'),
                 ];
             }
