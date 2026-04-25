@@ -255,25 +255,25 @@
                         : `<span class="small" style="font-size:0.7rem">KOSONG</span>`;
 
                     slotHtml += `
-                        <div class="slot ${statusClass} ${isProcessing ? 'opacity-50 border-primary' : ''}">
-                            <span class="kode-slot">${s.kode}</span>
-                            <span class="material-icons">${icon}</span>
-                            <div class="plat-info mt-1">
-                                ${isProcessing ? `<div class="spinner-border spinner-border-sm text-primary"></div>` : displayText}
-                            </div>
-                        </div>`;
+                            <div class="slot ${statusClass} ${isProcessing ? 'opacity-50 border-primary' : ''}">
+                                <span class="kode-slot">${s.kode}</span>
+                                <span class="material-icons">${icon}</span>
+                                <div class="plat-info mt-1">
+                                    ${isProcessing ? `<div class="spinner-border spinner-border-sm text-primary"></div>` : displayText}
+                                </div>
+                            </div>`;
                 });
 
                 html += `
-                    <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                            <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
-                            <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
-                        </div>
-                        <div class="card-body bg-light-subtle">
-                            <div class="slot-grid">${slotHtml}</div>
-                        </div>
-                    </div>`;
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
+                                <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
+                            </div>
+                            <div class="card-body bg-light-subtle">
+                                <div class="slot-grid">${slotHtml}</div>
+                            </div>
+                        </div>`;
             });
             wrapper.innerHTML = html;
         }
@@ -290,17 +290,17 @@
             activeTransactions.forEach(t => {
                 if (search && !t.plat.toUpperCase().includes(search)) return;
                 html += `
-                                    <tr>
-                                        <td class="ps-3 fw-bold">${t.plat}</td>
-                                        <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
-                                        <td>${t.masuk}</td>
-                                        <td><span class="text-primary fw-bold">${t.total_waktu}</span> mnt</td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-primary px-3 rounded-pill" onclick="openModal(${t.id})">
-                                                <i class="bi bi-box-arrow-right me-1"></i> Keluar
-                                            </button>
-                                        </td>
-                                    </tr>`;
+                                        <tr>
+                                            <td class="ps-3 fw-bold">${t.plat}</td>
+                                            <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
+                                            <td>${t.masuk}</td>
+                                            <td><span class="text-primary fw-bold">${t.total_waktu}</span> mnt</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-primary px-3 rounded-pill" onclick="openModal(${t.id})">
+                                                    <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                                                </button>
+                                            </td>
+                                        </tr>`;
             });
             tbody.innerHTML = html;
         }
@@ -365,47 +365,145 @@
 
         function printNota(data, settings = {}) {
             const totalMenit = parseInt(data.total_waktu) || 0;
-            const durasiStr = formatDurasiTeks(totalMenit);
+            const jam = Math.floor(totalMenit / 60);
+            const menit = totalMenit % 60;
+            const durasiStr = `${jam}j ${menit}m`;
+
+            const formatFullDate = (dateString) => {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+
+                const d = String(date.getDate()).padStart(2, '0');
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const y = date.getFullYear();
+                const h = String(date.getHours()).padStart(2, '0');
+                const min = String(date.getMinutes()).padStart(2, '0');
+
+                return `${d}/${m}/${y} ${h}:${min}`;
+            };
+
             const printWindow = window.open('', '_blank', 'width=400,height=600');
             if (!printWindow) return;
 
             const html = `
-                                <html>
-                                <head>
-                                    <style>
-                                        @page { size: 58mm auto; margin: 0; }
-                                        body { font-family: 'Courier New', monospace; width: 48mm; margin: 0 auto; padding: 10px 0; font-size: 11px; line-height: 1.2; }
-                                        .center { text-align: center; }
-                                        .bold { font-weight: bold; }
-                                        .line { border-top: 1px dashed #000; margin: 5px 0; }
-                                        .flex { display: flex; justify-content: space-between; }
-                                        .header-title { font-size: 14px; margin-bottom: 2px; }
-                                    </style>
-                                </head>
-                                <body>
-                                    <div class="center bold header-title">${(settings.app_name || 'SMART PARKING').toUpperCase()}</div>
-                                    <div class="center">${settings.lokasi_parkir || ''}</div>
-                                    <div class="center">${settings.alamat || ''}</div>
-                                    <div class="center">${settings.kontak || ''}</div>
-                                    <div class="line"></div>
-                                    <div class="flex"><span>Tgl Keluar:</span> <span>${data.waktu_keluar}</span></div>
-                                    <div class="line"></div>
-                                    <div class="bold" style="font-size:13px">PLAT: ${data.plat_nomor}</div>
-                                    <div class="flex"><span>Masuk:</span> <span>${formatTime(data.waktu_masuk)}</span></div>
-                                    <div class="flex"><span>Keluar:</span> <span>${formatTime(data.waktu_keluar)}</span></div>
-                                    <div class="flex"><span>Durasi:</span> <span>${durasiStr}</span></div>
-                                    <div class="line"></div>
-                                    <div class="flex bold" style="font-size:13px"><span>TOTAL:</span> <span>Rp ${formatRupiah(data.total_bayar)}</span></div>
-                                    <div class="line"></div>
-                                    <div class="center" style="margin-top:10px">TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
-                                    <div class="center">SIMPAN STRUK SEBAGAI BUKTI</div>
-                                    <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 500); }<\/script>
-                                </body>
-                                </html>`;
+            <html>
+            <head>
+                <style>
+                    @page { size: 58mm auto; margin: 0; }
+                    body {
+                        font-family: 'Courier New', monospace;
+                        width: 58mm;
+                        margin: 0 auto;
+                        padding: 8px;
+                        font-size: 11px;
+                        color: #000;
+                        line-height: 1.2;
+                    }
+                    .center { text-align: center; }
+                    .bold { font-weight: bold; }
+                    .title { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
+                    .line {
+                        border-top: 1px dashed #000;
+                        margin: 6px 0;
+                    }
+                    .row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin: 2px 0;
+                    }
+                    .box {
+                        border: 1px solid #000;
+                        padding: 5px;
+                        margin: 5px 0;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 10px;
+                        font-size: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="center title">
+                    ${(settings.app_name ?? 'SMART PARKING').toUpperCase()}
+                </div>
+
+                <div class="center" style="font-size:10px;">
+                    ${settings.lokasi_parkir ?? '-'}
+                </div>
+
+                <div class="center" style="font-size:10px;">
+                    ${settings.alamat ?? '-'}
+                </div>
+
+                <div class="center" style="font-size:10px;">
+                    ${settings.kontak ?? '-'}
+                </div>
+
+                <div class="line"></div>
+
+                <div class="row">
+                    <span>Kode Transaksi</span>
+                    <span>#${data.kode_qr ?? '-'}</span>
+                </div>
+
+                <div class="row">
+                    <span>Petugas</span>
+                    <span>${data.petugas ?? '-'}</span>
+                </div>
+
+                <div class="line"></div>
+
+                <div class="box">
+                    <div class="row"><span>PLAT</span><span class="bold">${data.plat_nomor}</span></div>
+                    <div class="row"><span>JENIS</span><span>${data.jenis ?? '-'}</span></div>
+                </div>
+
+                <div class="line"></div>
+
+                <div class="row">
+                    <span>Masuk</span>
+                    <span>${formatFullDate(data.waktu_masuk)}</span>
+                </div>
+
+                <div class="row">
+                    <span>Keluar</span>
+                    <span>${formatFullDate(data.waktu_keluar)}</span>
+                </div>
+
+                <div class="row">
+                    <span>Durasi</span>
+                    <span>${durasiStr}</span>
+                </div>
+
+                <div class="line"></div>
+
+                <div class="row bold" style="font-size:13px;">
+                    <span>TOTAL</span>
+                    <span>Rp ${formatRupiah(data.total_bayar)}</span>
+                </div>
+
+                <div class="line"></div>
+
+                <div class="footer">
+                    TERIMA KASIH ATAS KUNJUNGAN ANDA<br>
+                    SILAKAN SIMPAN STRUK INI
+                </div>
+
+                <script>
+                    window.onload = function () {
+                        window.print();
+                        setTimeout(() => window.close(), 500);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `;
+
             printWindow.document.write(html);
             printWindow.document.close();
         }
-
         function formatTime(t) {
             if (!t) return '-';
             const date = new Date(t);
