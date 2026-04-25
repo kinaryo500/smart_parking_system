@@ -9,7 +9,7 @@
                 <div class="card border-0 shadow-sm rounded overflow-hidden">
                     <div class="card-header bg-primary-subtle py-3">
                         <h4 class="fw-bold mb-1 text-dark">Monitoring Parkir</h4>
-                        <p class="text-muted small mb-0">Sistem Parkir Realtime (MQTT + Auto-Polling AJAX)</p>
+                        <p class="text-muted small mb-0">Sistem Parkir Realtime</p>
                     </div>
                 </div>
             </div>
