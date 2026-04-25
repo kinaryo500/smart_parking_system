@@ -93,7 +93,7 @@
                     {{ $transaksi->kendaraan->merk ?? '-' }} • {{ ucfirst($transaksi->jenis_kendaraan) }}
                 </small>
             </div>
-       
+
             <div class="row g-2">
                 <div class="col-6 col-sm-4">
                     <div class="info-box">
@@ -114,7 +114,8 @@
                         <small>Keluar</small>
                         <div id="jamKeluar">
                             @if($transaksi->status == 'aktif') --:-- @else
-                            {{ \Carbon\Carbon::parse($transaksi->waktu_keluar)->format('H:i') }} @endif
+                                {{ \Carbon\Carbon::parse($transaksi->waktu_keluar)->format('H:i') }}
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -144,6 +145,7 @@
 
                 <div id="biayaBox"
                     class="mt-4 p-4 rounded-4 {{ $transaksi->status == 'aktif' ? 'bg-primary text-white' : 'bg-success text-white' }}">
+
                     <small id="biayaLabel" class="d-block opacity-75 text-uppercase fw-bold" style="font-size:0.7rem;">
                         {{ $transaksi->status == 'aktif' ? 'Estimasi Biaya' : 'Total Pembayaran' }}
                     </small>
@@ -168,82 +170,132 @@
 @endsection
 
 @push('scripts')
-    <script>
-        const transaksiId = "{{ $transaksi->id }}";
-        let statusSekarang = "{{ $transaksi->status }}";
-        let liveInterval;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        function startLiveCounter() {
-            const start = new Date("{{ $transaksi->waktu_masuk }}").getTime();
-            const tarif = {{ $transaksi->tarif_per_jam }};
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-            liveInterval = setInterval(() => {
-                const now = new Date();
-                const diff = Math.max(0, now - start);
-                const menit = Math.floor(diff / 60000);
+        <script>
+            const transaksiId = "{{ $transaksi->id }}";
+            let statusSekarang = "{{ $transaksi->status }}";
+            let liveInterval = null;
+            let pollInterval = null;
+
+            function formatDurasi(menit) {
                 const jam = Math.floor(menit / 60);
                 const sisa = menit % 60;
-
-                document.getElementById('durasiDisplay').innerText =
-                    jam > 0 ? `${jam} jam ${sisa} menit` : `${menit} menit`;
-
-                const tagihanJam = Math.max(1, Math.ceil(menit / 60));
-                const total = tagihanJam * tarif;
-                document.getElementById('biayaDisplay').innerText = total.toLocaleString('id-ID');
-            }, 1000);
-        }
-
-        if (statusSekarang === 'aktif') {
-            startLiveCounter();
-        }
-
-        function initEcho() {
-            if (typeof window.Echo !== 'undefined') {
-                // Dengarkan channel khusus ID transaksi ini
-                window.Echo.channel(`transaksi.${transaksiId}`)
-                    .listen('.selesai', (e) => {
-                        console.log("Sinyal selesai diterima!", e);
-                        syncStatus();
-                    });
-            } else {
-                setTimeout(initEcho, 1000);
+                return jam > 0 ? `${jam} jam ${sisa} menit` : `${menit} menit`;
             }
-        }
-        initEcho();
 
-        async function syncStatus() {
-            if (statusSekarang === 'selesai') return;
+            function startLiveCounter() {
+                const start = new Date("{{ $transaksi->waktu_masuk }}").getTime();
+                const tarif = {{ $transaksi->tarif_per_jam }};
 
-            try {
-                const response = await fetch(`/transaksi/status/${transaksiId}`);
-                const data = await response.json();
+                if (liveInterval) clearInterval(liveInterval);
 
-                if (data.status === 'selesai') {
-                    statusSekarang = 'selesai';
-                    if (liveInterval) clearInterval(liveInterval);
+                console.log("[LIVE] Counter started", { start, tarif });
 
-                    const badge = document.getElementById('statusBadge');
-                    badge.className = "status-badge bg-light-success text-success";
-                    badge.innerText = "SELESAI";
+                liveInterval = setInterval(() => {
+                    const now = new Date().getTime();
+                    const diff = Math.max(0, now - start);
+                    const menit = Math.floor(diff / 60000);
 
-                    const biayaBox = document.getElementById('biayaBox');
-                    biayaBox.className = "mt-4 p-4 rounded-4 bg-success text-white";
-                    document.getElementById('biayaLabel').innerText = "TOTAL PEMBAYARAN";
-                    document.getElementById('jamKeluar').innerText = data.waktu_keluar;
-                    document.getElementById('durasiDisplay').innerText = data.durasi_teks;
-                    document.getElementById('biayaDisplay').innerText = data.total_bayar_formatted;
+                    console.log("[LIVE] Tick", { menit });
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Parkir Selesai!',
-                        text: 'Kendaraan telah keluar. Terima kasih!',
-                        timer: 3000,
-                        showConfirmButton: false
+                    document.getElementById('durasiDisplay').innerText = formatDurasi(menit);
+
+                    const tagihanJam = Math.max(1, Math.ceil(menit / 60));
+                    const total = tagihanJam * tarif;
+
+                    document.getElementById('biayaDisplay').innerText =
+                        total.toLocaleString('id-ID');
+
+                    console.log("[LIVE] Update biaya", { tagihanJam, total });
+                }, 1000);
+            }
+
+            function syncStatus() {
+                console.log("[SYNC] Request status transaksi:", transaksiId);
+
+                fetch(`/transaksi/status/${transaksiId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log("[SYNC] Response:", data);
+
+                        if (data.status === 'selesai' && statusSekarang !== 'selesai') {
+                            console.log("[SYNC] Status berubah menjadi SELESAI");
+
+                            statusSekarang = 'selesai';
+
+                            if (liveInterval) clearInterval(liveInterval);
+                            if (pollInterval) clearInterval(pollInterval);
+
+                            document.getElementById('statusBadge').className =
+                                "status-badge bg-light-success text-success";
+                            document.getElementById('statusBadge').innerText = "SELESAI";
+
+                            document.getElementById('biayaBox').className =
+                                "mt-4 p-4 rounded-4 bg-success text-white";
+
+                            document.getElementById('biayaLabel').innerText =
+                                "TOTAL PEMBAYARAN";
+
+                            document.getElementById('jamKeluar').innerText =
+                                data.waktu_keluar;
+
+                            document.getElementById('durasiDisplay').innerText =
+                                data.durasi_teks;
+
+                            document.getElementById('biayaDisplay').innerText =
+                                data.total_bayar_formatted;
+
+                            console.log("[SYNC] UI updated to selesai");
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Parkir Selesai!',
+                                text: 'Kendaraan telah keluar.',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            console.log("[SYNC] Belum selesai / tidak berubah status");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("[SYNC] Error:", err);
                     });
+            }
+
+            function initRealtime() {
+                console.log("[ECHO] Init realtime...");
+
+                if (typeof window.Echo !== 'undefined') {
+                    console.log("[ECHO] Connected, listening channel");
+
+                    window.Echo.channel(`transaksi.${transaksiId}`)
+                        .listen('.selesai', (e) => {
+                            console.log("[ECHO] Event SELSAI diterima:", e);
+                            syncStatus();
+                        });
+
+                } else {
+                    console.warn("[ECHO] Not ready, retry...");
+                    setTimeout(initRealtime, 1000);
                 }
-            } catch (err) {
-                console.error("Sync error:", err);
             }
-        }
-    </script>
+
+            if (statusSekarang === 'aktif') {
+                startLiveCounter();
+            }
+
+            initRealtime();
+
+            console.log("[POLL] Start interval 5s");
+            pollInterval = setInterval(() => {
+                console.log("[POLL] Checking status...");
+                syncStatus();
+            }, 5000);
+        </script>
+    @endpush
 @endpush
