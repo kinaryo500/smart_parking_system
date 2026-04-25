@@ -422,8 +422,8 @@
             loadInitialData();
             loadQR();
             listenRealtime();
-            setInterval(loadInitialData, 10000);
-            setInterval(loadQR, 20000);
+            // setInterval(loadInitialData, 10000);
+            // setInterval(loadQR, 20000);
         });
     </script>
 @endpush
