@@ -176,7 +176,7 @@
                 if (value && typeof value === 'object') {
                     slots.push({
                         kode: key.replace('slot_', '').toUpperCase(),
-                        status: (value.status || 'kosong').toLowerCase(),
+                        status: normalizeStatus(value.status),
                         jenis: (value.jenis || 'mobil').toLowerCase()
                     });
                 }
@@ -208,9 +208,7 @@
                     syncDatabase();
                 }, 1000);
             }
-        }
-
-        async function loadQR() {
+        } async function loadQR() {
             try {
                 const data = await fetchJSON(QR_URL);
                 if (data.success) {
@@ -251,30 +249,30 @@
                     const isProcessing = processingSlots.has(s.kode);
 
                     slotHtml += `
-                        <div class="slot ${statusClass} ${isProcessing ? 'opacity-50 border-primary' : ''}">
-                            <span class="kode-slot">${s.kode}</span>
-                            <span class="material-icons">${icon}</span>
-                            <div class="plat-info mt-1">
-                                ${isProcessing
+                                <div class="slot ${statusClass} ${isProcessing ? 'opacity-50 border-primary' : ''}">
+                                    <span class="kode-slot">${s.kode}</span>
+                                    <span class="material-icons">${icon}</span>
+                                    <div class="plat-info mt-1">
+                                        ${isProcessing
                             ? `<div class="spinner-border spinner-border-sm text-primary"></div>`
                             : (s.status === 'terisi'
                                 ? `<strong class="d-block" style="font-size:0.75rem">${platNomor}</strong>`
                                 : `<span class="small" style="font-size:0.7rem">KOSONG</span>`)
                         }
-                            </div>
-                        </div>`;
+                                    </div>
+                                </div>`;
                 });
 
                 html += `
-                    <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                            <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
-                            <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
-                        </div>
-                        <div class="card-body bg-light-subtle">
-                            <div class="slot-grid">${slotHtml}</div>
-                        </div>
-                    </div>`;
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
+                                    <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
+                                </div>
+                                <div class="card-body bg-light-subtle">
+                                    <div class="slot-grid">${slotHtml}</div>
+                                </div>
+                            </div>`;
             });
             wrapper.innerHTML = html;
         }
@@ -292,17 +290,17 @@
             activeTransactions.forEach(t => {
                 if (search && !t.plat.toUpperCase().includes(search)) return;
                 html += `
-                    <tr>
-                        <td class="ps-3 fw-bold">${t.plat}</td>
-                        <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
-                        <td>${t.masuk}</td>
-                        <td><span class="text-primary fw-bold">${t.total_waktu}</span> mnt</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary px-3 rounded-pill" onclick="openModal(${t.id})">
-                                <i class="bi bi-box-arrow-right me-1"></i> Keluar
-                            </button>
-                        </td>
-                    </tr>`;
+                            <tr>
+                                <td class="ps-3 fw-bold">${t.plat}</td>
+                                <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
+                                <td>${t.masuk}</td>
+                                <td><span class="text-primary fw-bold">${t.total_waktu}</span> mnt</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary px-3 rounded-pill" onclick="openModal(${t.id})">
+                                        <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                                    </button>
+                                </td>
+                            </tr>`;
             });
             tbody.innerHTML = html;
         }
@@ -372,38 +370,38 @@
             if (!printWindow) return;
 
             const html = `
-                <html>
-                <head>
-                    <style>
-                        @page { size: 58mm auto; margin: 0; }
-                        body { font-family: 'Courier New', monospace; width: 48mm; margin: 0 auto; padding: 10px 0; font-size: 11px; line-height: 1.2; }
-                        .center { text-align: center; }
-                        .bold { font-weight: bold; }
-                        .line { border-top: 1px dashed #000; margin: 5px 0; }
-                        .flex { display: flex; justify-content: space-between; }
-                        .header-title { font-size: 14px; margin-bottom: 2px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="center bold header-title">${(settings.app_name || 'SMART PARKING').toUpperCase()}</div>
-                    <div class="center">${settings.lokasi_parkir || ''}</div>
-                    <div class="center">${settings.alamat || ''}</div>
-                    <div class="center">${settings.kontak || ''}</div>
-                    <div class="line"></div>
-                    <div class="flex"><span>Tgl Keluar:</span> <span>${data.waktu_keluar}</span></div>
-                    <div class="line"></div>
-                    <div class="bold" style="font-size:13px">PLAT: ${data.plat_nomor}</div>
-                    <div class="flex"><span>Masuk:</span> <span>${formatTime(data.waktu_masuk)}</span></div>
-                    <div class="flex"><span>Keluar:</span> <span>${formatTime(data.waktu_keluar)}</span></div>
-                    <div class="flex"><span>Durasi:</span> <span>${durasiStr}</span></div>
-                    <div class="line"></div>
-                    <div class="flex bold" style="font-size:13px"><span>TOTAL:</span> <span>Rp ${formatRupiah(data.total_bayar)}</span></div>
-                    <div class="line"></div>
-                    <div class="center" style="margin-top:10px">TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
-                    <div class="center">SIMPAN STRUK SEBAGAI BUKTI</div>
-                    <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 500); }<\/script>
-                </body>
-                </html>`;
+                        <html>
+                        <head>
+                            <style>
+                                @page { size: 58mm auto; margin: 0; }
+                                body { font-family: 'Courier New', monospace; width: 48mm; margin: 0 auto; padding: 10px 0; font-size: 11px; line-height: 1.2; }
+                                .center { text-align: center; }
+                                .bold { font-weight: bold; }
+                                .line { border-top: 1px dashed #000; margin: 5px 0; }
+                                .flex { display: flex; justify-content: space-between; }
+                                .header-title { font-size: 14px; margin-bottom: 2px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="center bold header-title">${(settings.app_name || 'SMART PARKING').toUpperCase()}</div>
+                            <div class="center">${settings.lokasi_parkir || ''}</div>
+                            <div class="center">${settings.alamat || ''}</div>
+                            <div class="center">${settings.kontak || ''}</div>
+                            <div class="line"></div>
+                            <div class="flex"><span>Tgl Keluar:</span> <span>${data.waktu_keluar}</span></div>
+                            <div class="line"></div>
+                            <div class="bold" style="font-size:13px">PLAT: ${data.plat_nomor}</div>
+                            <div class="flex"><span>Masuk:</span> <span>${formatTime(data.waktu_masuk)}</span></div>
+                            <div class="flex"><span>Keluar:</span> <span>${formatTime(data.waktu_keluar)}</span></div>
+                            <div class="flex"><span>Durasi:</span> <span>${durasiStr}</span></div>
+                            <div class="line"></div>
+                            <div class="flex bold" style="font-size:13px"><span>TOTAL:</span> <span>Rp ${formatRupiah(data.total_bayar)}</span></div>
+                            <div class="line"></div>
+                            <div class="center" style="margin-top:10px">TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
+                            <div class="center">SIMPAN STRUK SEBAGAI BUKTI</div>
+                            <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 500); }<\/script>
+                        </body>
+                        </html>`;
             printWindow.document.write(html);
             printWindow.document.close();
         }
@@ -415,7 +413,21 @@
         }
         function formatRupiah(n) { return new Intl.NumberFormat('id-ID').format(n); }
         function formatDurasiTeks(m) { return `${Math.floor(m / 60)}j ${m % 60}m`; }
+        function normalizeStatus(status) {
+            if (!status) return 'kosong';
 
+            status = status.toLowerCase();
+
+            if (status === 'occupied' || status === 'terisi' || status === '1') {
+                return 'terisi';
+            }
+
+            if (status === 'empty' || status === 'kosong' || status === '0') {
+                return 'kosong';
+            }
+
+            return status;
+        }
         document.addEventListener('DOMContentLoaded', () => {
             syncDatabase();
             loadQR();
