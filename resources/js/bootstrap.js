@@ -8,14 +8,19 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
-window.Echo = new Echo({
+const pusherConfig = {
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
-    wsHost: import.meta.env.VITE_PUSHER_HOST,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'ap1',
     forceTLS: true,
     enabledTransports: ['ws', 'wss'],
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'ap1',
     disableStats: true,
-});
+};
+
+if (import.meta.env.VITE_PUSHER_HOST) {
+    pusherConfig.wsHost = import.meta.env.VITE_PUSHER_HOST;
+    pusherConfig.wsPort = import.meta.env.VITE_PUSHER_PORT ?? 443;
+    pusherConfig.wssPort = import.meta.env.VITE_PUSHER_PORT ?? 443;
+}
+
+window.Echo = new Echo(pusherConfig);
