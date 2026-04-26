@@ -196,22 +196,22 @@
                         '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 w-100">Parkir</span>';
 
                     html += `
-                                                                    <tr>
-                                                                        <td class="ps-4"><span class="fw-bold text-dark bg-light px-2 py-1 rounded border small text-nowrap">${t.plat_nomor}</span></td>
-                                                                        <td class="small text-muted">${t.jenis_kendaraan}</td>
-                                                                        <td class="small text-nowrap">${formatTime(t.waktu_masuk)}</td>
-                                                                        <td class="small text-nowrap">${t.waktu_keluar ? formatTime(t.waktu_keluar) : '<span class="text-muted italic">-</span>'}</td>
-                                                                        <td class="text-center small">${hitungDurasi(t.total_waktu)}</td>
-                                                                        <td class="text-end fw-bold text-dark small">Rp ${formatRupiah(t.total_bayar)}</td>
-                                                                        <td class="px-4 text-center">${statusBadge}</td>
-                                                                   <td class="text-center px-4">
-                                                <button class="btn btn-sm btn-outline-primary rounded-pill" 
-                                                        onclick="printNotaFromHistory(${t.id})">
-                                                    <i class="bi bi-printer"></i>
-                                                </button>
-                                            </td>
-                                                                        </tr>
-                                                                `;
+                                                                        <tr>
+                                                                            <td class="ps-4"><span class="fw-bold text-dark bg-light px-2 py-1 rounded border small text-nowrap">${t.plat_nomor}</span></td>
+                                                                            <td class="small text-muted">${t.jenis_kendaraan}</td>
+                                                                            <td class="small text-nowrap">${formatTime(t.waktu_masuk)}</td>
+                                                                            <td class="small text-nowrap">${t.waktu_keluar ? formatTime(t.waktu_keluar) : '<span class="text-muted italic">-</span>'}</td>
+                                                                            <td class="text-center small">${hitungDurasi(t.total_waktu)}</td>
+                                                                            <td class="text-end fw-bold text-dark small">Rp ${formatRupiah(t.total_bayar)}</td>
+                                                                            <td class="px-4 text-center">${statusBadge}</td>
+                                                                       <td class="text-center px-4">
+                                                    <button class="btn btn-sm btn-outline-primary rounded-pill" 
+                                                            onclick="printNotaFromHistory(${t.id})">
+                                                        <i class="bi bi-printer"></i>
+                                                    </button>
+                                                </td>
+                                                                            </tr>
+                                                                    `;
                 });
             }
 
@@ -232,16 +232,16 @@
             let html = '';
 
             html += `<li class="page-item ${paginator.current_page === 1 ? 'disabled' : ''}">
-                                                            <a class="page-link" onclick="changePage(${paginator.current_page - 1})"><i class="bi bi-chevron-left"></i></a>
-                                                        </li>`;
+                                                                <a class="page-link" onclick="changePage(${paginator.current_page - 1})"><i class="bi bi-chevron-left"></i></a>
+                                                            </li>`;
 
 
             for (let i = 1; i <= paginator.last_page; i++) {
                 if (i === 1 || i === paginator.last_page || (i >= paginator.current_page - 1 && i <= paginator
                     .current_page + 1)) {
                     html += `<li class="page-item ${paginator.current_page === i ? 'active' : ''}">
-                                                                    <a class="page-link" onclick="changePage(${i})">${i}</a>
-                                                                </li>`;
+                                                                        <a class="page-link" onclick="changePage(${i})">${i}</a>
+                                                                    </li>`;
                 } else if (i === paginator.current_page - 2 || i === paginator.current_page + 2) {
                     html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
                 }
@@ -249,8 +249,8 @@
 
 
             html += `<li class="page-item ${paginator.current_page === paginator.last_page ? 'disabled' : ''}">
-                                                            <a class="page-link" onclick="changePage(${paginator.current_page + 1})"><i class="bi bi-chevron-right"></i></a>
-                                                        </li>`;
+                                                                <a class="page-link" onclick="changePage(${paginator.current_page + 1})"><i class="bi bi-chevron-right"></i></a>
+                                                            </li>`;
 
             container.innerHTML = html;
         }
@@ -301,121 +301,124 @@
                 const d = String(date.getDate()).padStart(2, '0');
                 const m = String(date.getMonth() + 1).padStart(2, '0');
                 const y = date.getFullYear();
-                const jamMenit = formatTime(dateString);
 
-                return `${d}/${m}/${y} ${jamMenit}`;
+                const jam = String(date.getHours()).padStart(2, '0');
+                const menit = String(date.getMinutes()).padStart(2, '0');
+
+                return `${d}/${m}/${y} ${jam}:${menit}`;
             };
+
 
             const printWindow = window.open('', '_blank', 'width=400,height=600');
             if (!printWindow) return;
 
             const html = `
-                <html>
-                <head>
-                <style>
-                    @page { size: 58mm auto; margin: 0; }
-                    body {
-                        font-family: 'Courier New', monospace;
-                        width: 58mm;
-                        margin: 0 auto;
-                        padding: 8px;
-                        font-size: 11px;
-                        color: #000;
-                    }
-                    .center { text-align: center; }
-                    .bold { font-weight: bold; }
-                    .title { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
-                    .line {
-                        border-top: 1px dashed #000;
-                        margin: 6px 0;
-                    }
-                    .row {
-                        display: flex;
-                        justify-content: space-between;
-                        margin: 2px 0;
-                    }
-                    .footer {
-                        text-align: center;
-                        margin-top: 10px;
-                        font-size: 10px;
-                    }
-                    .box {
-                        border: 1px solid #000;
-                        padding: 5px;
-                        margin: 5px 0;
-                    }
-                </style>
-                </head>
-                <body>
-                    <div class="center title">
-                        ${settings.app_name ?? 'SMART PARKING'}
-                    </div>
-                    <div class="center" style="font-size:10px;">
-                        ${settings.lokasi_parkir ?? '-'}
-                    </div>
-                    <div class="center" style="font-size:10px;">
-                        ${settings.alamat ?? '-'}
-                    </div>
-                    <div class="center" style="font-size:10px;">
-                        ${settings.kontak ?? '-'}
-                    </div>
-
-                    <div class="line"></div>
-
-                    <div class="row">
-                        <span>Kode Transaksi</span>
-                        <span>#${data.kode_qr}</span>
-                    </div>
-                    <div class="row">
-                        <span>Petugas</span>
-                        <span>${data.petugas ?? '-'}</span>
-                    </div>
-
-                    <div class="line"></div>
-
-                    <div class="box">
-                        <div class="row"><span>PLAT</span><span class="bold">${data.plat_nomor}</span></div>
-                        <div class="row"><span>JENIS</span><span>${data.jenis}</span></div>
-                    </div>
-
-                    <div class="line"></div>
-
-                    <div class="row">
-                        <span>Masuk</span>
-                        <span>${formatTanggalLengkap(data.waktu_masuk)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Keluar</span>
-                        <span>${formatTanggalLengkap(data.waktu_keluar)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Durasi</span>
-                        <span>${jam}j ${menit}m</span>
-                    </div>
-
-                    <div class="line"></div>
-
-                    <div class="row bold" style="font-size:13px;">
-                        <span>TOTAL</span>
-                        <span>Rp ${formatRupiah(data.total_bayar)}</span>
-                    </div>
-
-                    <div class="line"></div>
-
-                    <div class="footer">
-                        TERIMA KASIH<br>
-                        SILAKAN SIMPAN STRUK INI
-                    </div>
-
-                    <script>
-                        window.onload = function () {
-                            window.print();
-                            setTimeout(() => window.close(), 500);
+                    <html>
+                    <head>
+                    <style>
+                        @page { size: 58mm auto; margin: 0; }
+                        body {
+                            font-family: 'Courier New', monospace;
+                            width: 58mm;
+                            margin: 0 auto;
+                            padding: 8px;
+                            font-size: 11px;
+                            color: #000;
                         }
-                    <\/script>
-                </body>
-                </html>
-            `;
+                        .center { text-align: center; }
+                        .bold { font-weight: bold; }
+                        .title { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
+                        .line {
+                            border-top: 1px dashed #000;
+                            margin: 6px 0;
+                        }
+                        .row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 2px 0;
+                        }
+                        .footer {
+                            text-align: center;
+                            margin-top: 10px;
+                            font-size: 10px;
+                        }
+                        .box {
+                            border: 1px solid #000;
+                            padding: 5px;
+                            margin: 5px 0;
+                        }
+                    </style>
+                    </head>
+                    <body>
+                        <div class="center title">
+                            ${settings.app_name ?? 'SMART PARKING'}
+                        </div>
+                        <div class="center" style="font-size:10px;">
+                            ${settings.lokasi_parkir ?? '-'}
+                        </div>
+                        <div class="center" style="font-size:10px;">
+                            ${settings.alamat ?? '-'}
+                        </div>
+                        <div class="center" style="font-size:10px;">
+                            ${settings.kontak ?? '-'}
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="row">
+                            <span>Kode Transaksi</span>
+                            <span>#${data.kode_qr}</span>
+                        </div>
+                        <div class="row">
+                            <span>Petugas</span>
+                            <span>${data.petugas ?? '-'}</span>
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="box">
+                            <div class="row"><span>PLAT</span><span class="bold">${data.plat_nomor}</span></div>
+                            <div class="row"><span>JENIS</span><span>${data.jenis}</span></div>
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="row">
+                            <span>Masuk</span>
+                            <span>${formatTanggalLengkap(data.waktu_masuk)}</span>
+                        </div>
+                        <div class="row">
+                            <span>Keluar</span>
+                            <span>${formatTanggalLengkap(data.waktu_keluar)}</span>
+                        </div>
+                        <div class="row">
+                            <span>Durasi</span>
+                            <span>${jam}j ${menit}m</span>
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="row bold" style="font-size:13px;">
+                            <span>TOTAL</span>
+                            <span>Rp ${formatRupiah(data.total_bayar)}</span>
+                        </div>
+
+                        <div class="line"></div>
+
+                        <div class="footer">
+                            TERIMA KASIH<br>
+                            SILAKAN SIMPAN STRUK INI
+                        </div>
+
+                        <script>
+                            window.onload = function () {
+                                window.print();
+                                setTimeout(() => window.close(), 500);
+                            }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
 
             printWindow.document.write(html);
             printWindow.document.close();

@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ParkirTransaksi extends Model
 {
     protected $table = 'parkir_transaksis';
-
 
     protected $guarded = [];
 
@@ -19,6 +18,8 @@ class ParkirTransaksi extends Model
         'total_bayar' => 'integer',
         'tarif_per_jam' => 'integer',
     ];
+
+    protected $appends = ['durasi_saat_ini', 'estimasi_biaya', 'format_waktu_masuk'];
 
     public function hitungDurasi()
     {
@@ -32,7 +33,6 @@ class ParkirTransaksi extends Model
         return (int) $masuk->diffInMinutes($keluar);
     }
 
-
     public function hitungTotalBayar()
     {
         $menit = $this->hitungDurasi();
@@ -40,39 +40,35 @@ class ParkirTransaksi extends Model
         return (int) ($jam * ($this->tarif_per_jam ?? 2000));
     }
 
-
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function petugas()
+    public function petugas(): BelongsTo
     {
         return $this->belongsTo(User::class, 'petugas_id');
     }
 
-    public function kendaraan()
+    public function kendaraan(): BelongsTo
     {
         return $this->belongsTo(Kendaraan::class, 'kendaraan_id');
     }
 
-    public function qrParkir()
+    public function qrParkir(): BelongsTo
     {
         return $this->belongsTo(QRParkir::class, 'qr_parkir_id');
     }
 
-    public function gateMasuk()
+    public function gateMasuk(): BelongsTo
     {
         return $this->belongsTo(Gate::class, 'gate_masuk_id');
     }
 
-    public function gateKeluar()
+    public function gateKeluar(): BelongsTo
     {
         return $this->belongsTo(Gate::class, 'gate_keluar_id');
     }
-
-    protected $appends = ['durasi_saat_ini', 'estimasi_biaya', 'format_waktu_masuk'];
-
 
     public function getDurasiSaatIniAttribute()
     {
@@ -88,7 +84,6 @@ class ParkirTransaksi extends Model
     {
         return $this->waktu_masuk ? $this->waktu_masuk->format('H:i:s') : '-';
     }
-
 
     public function scopeAktif($query)
     {

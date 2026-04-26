@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -9,32 +10,40 @@ use App\Models\Gate;
 use App\Models\User;
 use App\Models\QRParkir;
 use Carbon\Carbon;
-use Illuminate\Support\Str; // Pastikan ini ada
+use Illuminate\Support\Str;
 
 class ParkirTransaksiSeeder extends Seeder
 {
     public function run(): void
     {
-        $kendaraans = Kendaraan::all();
         $gateMasuk = Gate::where('tipe_gate', 'masuk')->first();
         $petugasList = User::where('role', 'petugas')->get();
+        $allKendaraan = Kendaraan::all();
 
-        if ($kendaraans->isEmpty() || !$gateMasuk || $petugasList->isEmpty()) {
+        if ($allKendaraan->isEmpty() || !$gateMasuk || $petugasList->isEmpty()) {
             $this->command->warn('Data kendaraan / gate / petugas belum lengkap!');
             return;
         }
 
-        // 1. Buat transaksi yang dibutuhkan
         for ($i = 0; $i < 40; $i++) {
-            $this->createTransaksi($kendaraans->random(), $petugasList->random(), $gateMasuk, 'selesai', true);
+            $this->createTransaksi($allKendaraan->random(), $petugasList->random(), $gateMasuk, 'selesai', true);
         }
 
         for ($i = 0; $i < 10; $i++) {
-            $this->createTransaksi($kendaraans->random(), $petugasList->random(), $gateMasuk, 'selesai', false);
+            $this->createTransaksi($allKendaraan->random(), $petugasList->random(), $gateMasuk, 'selesai', false);
         }
 
-        for ($i = 0; $i < 5; $i++) {
-            $this->createTransaksi($kendaraans->random(), $petugasList->random(), $gateMasuk, 'aktif', false);
+        $kendaraanTersedia = Kendaraan::whereDoesntHave('parkirTransaksis', function ($query) {
+            $query->where('status', 'aktif');
+        })->get();
+
+        if ($kendaraanTersedia->isNotEmpty()) {
+            $jumlahAktif = min(5, $kendaraanTersedia->count());
+            $kendaraanUntukAktif = $kendaraanTersedia->random($jumlahAktif);
+
+            foreach ($kendaraanUntukAktif as $kendaraan) {
+                $this->createTransaksi($kendaraan, $petugasList->random(), $gateMasuk, 'aktif', false);
+            }
         }
 
         QRParkir::create([
@@ -43,7 +52,7 @@ class ParkirTransaksiSeeder extends Seeder
             'aktif' => true
         ]);
 
-        $this->command->info('Seeder transaksi dan 1 QR Standby berhasil dibuat.');
+        $this->command->info('Seeder transaksi berhasil dijalankan.');
     }
 
     private function createTransaksi($kendaraan, $petugas, $gate, $status, $isOldData)
@@ -51,24 +60,20 @@ class ParkirTransaksiSeeder extends Seeder
         $tarif = Tarif::where('nama', strtolower($kendaraan->jenis))->first();
         $tarifPerJam = $tarif->tarif_per_jam ?? 2000;
 
-        // Buat QR untuk transaksi ini (status mengikuti transaksi)
         $qr = QRParkir::create([
             'kode' => 'PKR-' . strtoupper(Str::random(6)),
-            'status' => ($status === 'aktif') ? 'digunakan' : 'tersedia',
+            'status' => ($status === 'aktif') ? 'terpakai' : 'tersedia',
             'aktif' => true
         ]);
 
-        if ($isOldData) {
-            $waktuMasuk = Carbon::now()->subDays(rand(1, 60))->subMinutes(rand(0, 1440));
-        } else {
-            $waktuMasuk = Carbon::now()->subMinutes(rand(10, 300));
-        }
+        $waktuMasuk = $isOldData 
+            ? Carbon::now()->subDays(rand(1, 60))->subMinutes(rand(0, 1440))
+            : Carbon::now()->subMinutes(rand(10, 300));
 
         if ($status === 'selesai') {
             $durasiMenit = rand(10, 300);
             $waktuKeluar = (clone $waktuMasuk)->addMinutes($durasiMenit);
-            $jam = max(1, ceil($durasiMenit / 60));
-            $totalBayar = $jam * $tarifPerJam;
+            $totalBayar = max(1, ceil($durasiMenit / 60)) * $tarifPerJam;
         } else {
             $waktuKeluar = null;
             $durasiMenit = null;

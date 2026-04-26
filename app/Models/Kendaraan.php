@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Kendaraan extends Model
 {
@@ -14,7 +16,7 @@ class Kendaraan extends Model
         'warna'
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -27,5 +29,10 @@ class Kendaraan extends Model
     public function isMobil()
     {
         return $this->jenis === 'mobil';
+    }
+
+    public function parkirTransaksis(): HasMany
+    {
+        return $this->hasMany(ParkirTransaksi::class);
     }
 }

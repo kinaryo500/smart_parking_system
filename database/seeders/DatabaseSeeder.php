@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
 
         $this->call(TarifSeeder::class);
-        $this->call(QRParkirSeeder::class);
+        // $this->call(QRParkirSeeder::class);
         $this->call(UserSeeder::class);
         $this->call(KendaraanSeeder::class);
         $this->call(GateSeeder::class);
