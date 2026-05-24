@@ -56,12 +56,64 @@
             background-color: #dcfce7;
             color: #15803d;
         }
+
+        #notifSelesai {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #16a34a;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-weight: 700;
+            z-index: 9999;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideDown .4s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .blink {
+            animation: blinkAnim 1s infinite;
+        }
+
+        @keyframes blinkAnim {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
     </style>
-
-
 @endpush
 
 @section('content')
+
+    <audio id="notifSound">
+        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+    </audio>
+
+    <div id="notifSelesai">
+        ✅ Parkir selesai • Kendaraan telah keluar
+    </div>
 
     <div class="container mt-4 mb-5">
         <div class="card card-detail p-4 text-center" id="main-card">
@@ -91,31 +143,43 @@
                 <h4 class="fw-bold mb-0" style="letter-spacing:2px">
                     {{ strtoupper($transaksi->kendaraan->plat_nomor ?? '-') }}
                 </h4>
+
                 <small class="text-muted">
-                    {{ $transaksi->kendaraan->merk ?? '-' }} • {{ ucfirst($transaksi->jenis_kendaraan) }}
+                    {{ $transaksi->kendaraan->merk ?? '-' }} •
+                    {{ ucfirst($transaksi->jenis_kendaraan) }}
                 </small>
             </div>
 
             <div class="row g-2">
+
                 <div class="col-6 col-sm-4">
                     <div class="info-box">
                         <small>Masuk</small>
-                        <div>{{ \Carbon\Carbon::parse($transaksi->waktu_masuk)->format('H:i') }}</div>
+
+                        <div>
+                            {{ \Carbon\Carbon::parse($transaksi->waktu_masuk)->format('H:i') }}
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-6 col-sm-4">
                     <div class="info-box">
                         <small>Tanggal</small>
-                        <div>{{ \Carbon\Carbon::parse($transaksi->waktu_masuk)->format('d M Y') }}</div>
+
+                        <div>
+                            {{ \Carbon\Carbon::parse($transaksi->waktu_masuk)->format('d M Y') }}
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-6 col-sm-4">
                     <div class="info-box">
                         <small>Keluar</small>
+
                         <div id="jamKeluar">
-                            @if($transaksi->status == 'aktif') --:-- @else
+                            @if($transaksi->status == 'aktif')
+                                --:--
+                            @else
                                 {{ \Carbon\Carbon::parse($transaksi->waktu_keluar)->format('H:i') }}
                             @endif
                         </div>
@@ -125,43 +189,73 @@
                 <div class="col-6 col-sm-4 mx-auto">
                     <div class="info-box">
                         <small>Tarif/Jam</small>
-                        <div>Rp {{ number_format($transaksi->tarif_per_jam, 0, ',', '.') }}</div>
+
+                        <div>
+                            Rp {{ number_format($transaksi->tarif_per_jam, 0, ',', '.') }}
+                        </div>
                     </div>
                 </div>
+
             </div>
 
             <hr class="my-4 opacity-25">
 
             <div class="py-2">
-                <small class="text-muted d-block mb-1 text-uppercase" style="font-size:0.7rem;">
+
+                <small class="text-muted d-block mb-1 text-uppercase"
+                    style="font-size:0.7rem;">
                     Durasi Parkir
                 </small>
 
                 <div class="fw-bold fs-5" id="durasiDisplay">
+
                     @if($transaksi->status != 'aktif')
-                        {{ floor(($transaksi->total_waktu ?? 0) / 60) }} jam {{ ($transaksi->total_waktu ?? 0) % 60 }} menit
+                        {{ floor(($transaksi->total_waktu ?? 0) / 60) }}
+                        jam
+                        {{ ($transaksi->total_waktu ?? 0) % 60 }}
+                        menit
                     @else
                         Menghitung...
                     @endif
+
                 </div>
 
                 <div id="biayaBox"
                     class="mt-4 p-4 rounded-4 {{ $transaksi->status == 'aktif' ? 'bg-primary text-white' : 'bg-success text-white' }}">
 
-                    <small id="biayaLabel" class="d-block opacity-75 text-uppercase fw-bold" style="font-size:0.7rem;">
-                        {{ $transaksi->status == 'aktif' ? 'Estimasi Biaya' : 'Total Pembayaran' }}
+                    <small id="biayaLabel"
+                        class="d-block opacity-75 text-uppercase fw-bold"
+                        style="font-size:0.7rem;">
+
+                        {{ $transaksi->status == 'aktif'
+                            ? 'Estimasi Biaya'
+                            : 'Total Pembayaran' }}
+
                     </small>
 
                     <div class="fw-bold fs-3">
-                        Rp <span id="biayaDisplay">
-                            {{ number_format($transaksi->status == 'aktif' ? 0 : ($transaksi->total_bayar ?? 0), 0, ',', '.') }}
+                        Rp
+                        <span id="biayaDisplay">
+
+                            {{ number_format(
+                                $transaksi->status == 'aktif'
+                                    ? 0
+                                    : ($transaksi->total_bayar ?? 0),
+                                0,
+                                ',',
+                                '.'
+                            ) }}
+
                         </span>
                     </div>
+
                 </div>
+
             </div>
 
             <div class="d-grid mt-4">
-                <a href="{{ route('user.dashboard') }}" class="btn btn-outline-secondary fw-bold py-2">
+                <a href="{{ route('user.dashboard') }}"
+                    class="btn btn-outline-secondary fw-bold py-2">
                     Kembali ke Dashboard
                 </a>
             </div>
@@ -169,90 +263,146 @@
         </div>
     </div>
 
-
 @endsection
 
 @push('scripts')
 
+<script>
 
-    <script>
-        const transaksiId = "{{ $transaksi->id }}";
-        const waktuMasuk = "{{ $transaksi->waktu_masuk }}";
-        const tarifPerJam = {{ $transaksi->tarif_per_jam }};
-        let statusSekarang = "{{ $transaksi->status }}";
+    const transaksiId = "{{ $transaksi->id }}";
+    const waktuMasuk = "{{ $transaksi->waktu_masuk }}";
+    const tarifPerJam = {{ $transaksi->tarif_per_jam }};
+    let statusSekarang = "{{ $transaksi->status }}";
 
-        let liveInterval = null;
-        let pollInterval = null;
+    let liveInterval = null;
+    let pollInterval = null;
 
-        function formatRupiah(n) {
-            return new Intl.NumberFormat('id-ID').format(n);
-        }
+    function formatRupiah(n) {
+        return new Intl.NumberFormat('id-ID').format(n);
+    }
 
-        function formatDurasi(menit) {
-            const jam = Math.floor(menit / 60);
-            const sisa = menit % 60;
-            return jam > 0 ? `${jam} jam ${sisa} menit` : `${menit} menit`;
-        }
+    function formatDurasi(menit) {
 
-        function updateLiveCounter() {
-            if (statusSekarang !== 'aktif') return;
+        const jam = Math.floor(menit / 60);
+        const sisa = menit % 60;
 
-            const start = new Date(waktuMasuk).getTime();
-            const now = new Date().getTime();
-            const diff = Math.max(0, now - start);
-            const menit = Math.floor(diff / 60000);
+        return jam > 0
+            ? `${jam} jam ${sisa} menit`
+            : `${menit} menit`;
+    }
 
-            document.getElementById('durasiDisplay').innerText = formatDurasi(menit);
+    function updateLiveCounter() {
 
-            const tagihanJam = Math.max(1, Math.ceil(menit / 60));
-            const total = tagihanJam * tarifPerJam;
+        if (statusSekarang !== 'aktif') return;
 
-            document.getElementById('biayaDisplay').innerText = formatRupiah(total);
-        }
+        const start = new Date(waktuMasuk).getTime();
+        const now = new Date().getTime();
 
-        async function syncStatus() {
-            try {
-                const res = await fetch(`/transaksi/status/${transaksiId}?t=${Date.now()}`);
-                const data = await res.json();
+        const diff = Math.max(0, now - start);
 
-                if (data.status === 'selesai' && statusSekarang !== 'selesai') {
-                    statusSekarang = 'selesai';
+        const menit = Math.floor(diff / 60000);
 
-                    if (liveInterval) clearInterval(liveInterval);
-                    if (pollInterval) clearInterval(pollInterval);
+        document.getElementById('durasiDisplay').innerText =
+            formatDurasi(menit);
 
-                    document.getElementById('statusBadge').className = "status-badge bg-light-success text-success";
-                    document.getElementById('statusBadge').innerText = "SELESAI";
+        const tagihanJam = Math.max(1, Math.ceil(menit / 60));
 
-                    document.getElementById('biayaBox').className = "mt-4 p-4 rounded-4 bg-success text-white";
-                    document.getElementById('biayaLabel').innerText = "TOTAL PEMBAYARAN";
+        const total = tagihanJam * tarifPerJam;
 
-                    document.getElementById('jamKeluar').innerText = data.waktu_keluar;
-                    document.getElementById('durasiDisplay').innerText = data.durasi_teks;
-                    document.getElementById('biayaDisplay').innerText = data.total_bayar_formatted;
+        document.getElementById('biayaDisplay').innerText =
+            formatRupiah(total);
+    }
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Parkir Selesai!',
-                        text: 'Kendaraan telah keluar.',
-                        timer: 4000,
-                        showConfirmButton: false
-                    });
+    async function syncStatus() {
+
+        try {
+
+            const res = await fetch(
+                `/transaksi/status/${transaksiId}?t=${Date.now()}`
+            );
+
+            const data = await res.json();
+
+            if (
+                data.status === 'selesai' &&
+                statusSekarang !== 'selesai'
+            ) {
+
+                statusSekarang = 'selesai';
+
+                if (liveInterval)
+                    clearInterval(liveInterval);
+
+                if (pollInterval)
+                    clearInterval(pollInterval);
+
+                const badge =
+                    document.getElementById('statusBadge');
+
+                badge.className =
+                    "status-badge bg-light-success text-success blink";
+
+                badge.innerText = "SELESAI";
+
+                document.getElementById('biayaBox').className =
+                    "mt-4 p-4 rounded-4 bg-success text-white";
+
+                document.getElementById('biayaLabel').innerText =
+                    "TOTAL PEMBAYARAN";
+
+                document.getElementById('jamKeluar').innerText =
+                    data.waktu_keluar;
+
+                document.getElementById('durasiDisplay').innerText =
+                    data.durasi_teks;
+
+                document.getElementById('biayaDisplay').innerText =
+                    data.total_bayar_formatted;
+
+                document.getElementById('notifSound').play();
+
+                if (navigator.vibrate) {
+                    navigator.vibrate([200, 100, 200]);
                 }
-            } catch (err) {
-                console.error("Polling error:", err);
+
+                const notifBox =
+                    document.getElementById('notifSelesai');
+
+                notifBox.style.display = 'block';
+
+                setTimeout(() => {
+                    notifBox.style.display = 'none';
+                }, 5000);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Parkir Selesai!',
+                    text: 'Kendaraan telah keluar dari area parkir.',
+                    timer: 5000,
+                    showConfirmButton: false
+                });
             }
+
+        } catch (err) {
+
+            console.error("Polling error:", err);
         }
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (statusSekarang === 'aktif') {
-                updateLiveCounter();
-                liveInterval = setInterval(updateLiveCounter, 1000);
+    document.addEventListener('DOMContentLoaded', () => {
 
-                pollInterval = setInterval(syncStatus, 4000);
-            }
-        });
-    </script>
+        if (statusSekarang === 'aktif') {
 
+            updateLiveCounter();
+
+            liveInterval =
+                setInterval(updateLiveCounter, 1000);
+
+            pollInterval =
+                setInterval(syncStatus, 4000);
+        }
+    });
+
+</script>
 
 @endpush
