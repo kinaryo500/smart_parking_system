@@ -387,7 +387,7 @@
 
     async function syncStatus(){
         try{
-            const res = await fetch(`/transaksi/status/${transaksiId}?t=${Date.now()}`);
+            const res = await fetch(`/pegawai/transaksi/status/${transaksiId}?t=${Date.now()}`);
             const data = await res.json();
 
             if(data.status === 'selesai' && statusSekarang !== 'selesai'){
