@@ -10,10 +10,10 @@ class KendaraanSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::where('role', 'user')->get();
+        $users = User::whereIn('role', ['user', 'pasien', 'pegawai'])->get();
 
         foreach ($users as $user) {
-            $jumlahKendaraan = rand(5, 10);
+            $jumlahKendaraan = rand(1, 5);
 
             for ($i = 1; $i <= $jumlahKendaraan; $i++) {
                 $jenis = rand(0, 1) ? 'motor' : 'mobil';
@@ -31,6 +31,6 @@ class KendaraanSeeder extends Seeder
 
     private function generatePlat()
     {
-        return 'PA ' . rand(1000, 9999) . ' ' . chr(rand(65, 90)) . chr(rand(65, 90));
+        return 'B ' . rand(1000, 9999) . ' ' . chr(rand(65, 90)) . chr(rand(65, 90));
     }
 }

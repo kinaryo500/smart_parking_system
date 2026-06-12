@@ -73,7 +73,13 @@ class ParkirTransaksiSeeder extends Seeder
         if ($status === 'selesai') {
             $durasiMenit = rand(10, 300);
             $waktuKeluar = (clone $waktuMasuk)->addMinutes($durasiMenit);
-            $totalBayar = max(1, ceil($durasiMenit / 60)) * $tarifPerJam;
+
+            $pemilik = User::find($kendaraan->user_id);
+            if ($pemilik && in_array($pemilik->role, ['pegawai', 'pasien'])) {
+                $totalBayar = 0;
+            } else {
+                $totalBayar = max(1, ceil($durasiMenit / 60)) * $tarifPerJam;
+            }
         } else {
             $waktuKeluar = null;
             $durasiMenit = null;

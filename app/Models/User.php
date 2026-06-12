@@ -52,4 +52,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\ParkirTransaksi::class, 'petugas_id');
     }
+
+
+    public function kendaraans()
+    {
+        return $this->hasMany(Kendaraan::class, 'user_id');
+    }
 }

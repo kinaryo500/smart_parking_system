@@ -25,7 +25,9 @@ class PetugasDashboardController extends Controller
     {
         try {
             $slotsFromEsp = Cache::get('esp_slots_status', []);
-            $transaksiAktif = ParkirTransaksi::with('kendaraan')
+            
+            // Ditambahkan relasi 'user' agar konsisten dengan admin
+            $transaksiAktif = ParkirTransaksi::with(['kendaraan', 'user'])
                 ->where('status', 'aktif')
                 ->orderByDesc('waktu_masuk')
                 ->get();
@@ -54,7 +56,8 @@ class PetugasDashboardController extends Controller
                     'masuk'         => Carbon::parse($t->waktu_masuk)->format('H:i:s'),
                     'total_waktu'   => (int) $t->hitungDurasi(),
                     'tarif'         => $t->tarif_per_jam,
-                    'waktu_masuk'   => $t->waktu_masuk
+                    'waktu_masuk'   => $t->waktu_masuk,
+                    'role_user'     => $t->user->role ?? '-' // Ditambahkan mapping role user
                 ];
             });
 
@@ -83,7 +86,8 @@ class PetugasDashboardController extends Controller
     {
         DB::beginTransaction();
         try {
-            $trx = ParkirTransaksi::with(['kendaraan', 'qrParkir'])->findOrFail($id);
+            // Eager load relasi 'user' agar fungsi hitungTotalBayar() dapat membaca role dengan benar
+            $trx = ParkirTransaksi::with(['kendaraan', 'qrParkir', 'user'])->findOrFail($id);
 
             $totalBayar = $trx->hitungTotalBayar();
             $durasiMenit = (int) $trx->hitungDurasi();
@@ -131,10 +135,11 @@ class PetugasDashboardController extends Controller
                     'jenis'         => $trx->kendaraan->jenis ?? '-',
                     'waktu_masuk'   => $trx->waktu_masuk,
                     'waktu_keluar'  => $trx->waktu_keluar->format('Y-m-d H:i:s'),
-                    'total_waktu'   => $durasiMenit, // Dalam menit
+                    'total_waktu'   => $durasiMenit, 
                     'total_bayar'   => (int) $totalBayar,
                     'petugas'       => auth()->user()->name ?? '-',
                     'tarif_per_jam' => $trx->tarif_per_jam ?? 0,
+                    'role_penerima' => $trx->user->role ?? 'Umum' // Ditambahkan agar sama persis dengan admin
                 ],
                 'settings'    => [
                     'app_name'      => Setting::where('key', 'app_name')->first()?->value ?? 'SMART PARKING',

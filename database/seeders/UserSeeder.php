@@ -10,7 +10,6 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-
         User::create([
             'name' => 'Admin Smart Parking',
             'email' => 'admin@smartparking.test',
@@ -19,25 +18,36 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
+        User::create([
+            'name' => 'Petugas 1',
+            'email' => 'petugas1@smartparking.test',
+            'no_hp' => '082222222221',
+            'role' => 'petugas',
+            'password' => Hash::make('password'),
+        ]);
 
-        for ($i = 1; $i <= 1; $i++) {
-            User::create([
-                'name' => "Petugas {$i}",
-                'email' => "petugas{$i}@smartparking.test",
-                'no_hp' => "08222222222{$i}",
-                'role' => 'petugas',
-                'password' => Hash::make('password'),
-            ]);
-        }
+        User::create([
+            'name' => 'Pegawai 1',
+            'email' => 'pegawai1@smartparking.test',
+            'no_hp' => '084444444441',
+            'role' => 'pegawai',
+            'password' => Hash::make('password'),
+        ]);
 
-        
-            User::create([
-                'name' => "User {$i}",
-                'email' => "user1@smartparking.test",
-                'no_hp' => "08333333333{$i}",
-                'role' => 'user',
-                'password' => Hash::make('password'),
-            ]);
-        
+        User::create([
+            'name' => 'Pasien 1',
+            'email' => 'pasien1@smartparking.test',
+            'no_hp' => '085555555551',
+            'role' => 'pasien',
+            'password' => Hash::make('password'),
+        ]);
+
+        User::create([
+            'name' => 'User Umum 1',
+            'email' => 'user1@smartparking.test',
+            'no_hp' => '083333333331',
+            'role' => 'user',
+            'password' => Hash::make('password'),
+        ]);
     }
 }

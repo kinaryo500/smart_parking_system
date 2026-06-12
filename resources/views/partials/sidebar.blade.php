@@ -32,7 +32,6 @@
                 <i class="bi bi-clock-history"></i> Riwayat Transaksi
             </a>
 
-
             <a href="{{ route('admin.tarif.index') }}"
                 class="nav-link {{ request()->routeIs('admin.tarif.*') ? 'active' : '' }}">
                 <i class="bi bi-cash-coin"></i> Kelola Tarif
@@ -41,6 +40,16 @@
             <a href="{{ route('admin.petugas.index') }}"
                 class="nav-link {{ request()->routeIs('admin.petugas.*') ? 'active' : '' }}">
                 <i class="bi bi-person-badge"></i> Kelola Petugas
+            </a>
+
+            <a href="{{ route('admin.pegawai.index') }}"
+                class="nav-link {{ request()->routeIs('admin.pegawai.*') ? 'active' : '' }}">
+                <i class="bi bi-person-workspace"></i> Kelola Pegawai
+            </a>
+
+            <a href="{{ route('admin.pasien.index') }}"
+                class="nav-link {{ request()->routeIs('admin.pasien.*') ? 'active' : '' }}">
+                <i class="bi bi-heart-pulse"></i> Kelola Pasien
             </a>
 
             <a href="{{ route('admin.user.index') }}"

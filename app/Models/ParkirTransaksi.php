@@ -35,6 +35,12 @@ class ParkirTransaksi extends Model
 
     public function hitungTotalBayar()
     {
+        // Cek apakah role user adalah pasien atau pegawai
+        $role = strtolower($this->user->role ?? '');
+        if (in_array($role, ['pasien', 'pegawai'])) {
+            return 0; // Tarif Rp 0
+        }
+
         $menit = $this->hitungDurasi();
         $jam = max(1, ceil($menit / 60));
         return (int) ($jam * ($this->tarif_per_jam ?? 2000));

@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Pasien;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kendaraan;
 use App\Models\QRParkir;
 use App\Models\ParkirTransaksi;
-use App\Models\Tarif;
 use App\Models\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +16,7 @@ use Illuminate\Support\Str;
 use App\Events\QRUpdated;
 use App\Services\MqttService;
 
-class UserParkirController extends Controller
+class PasienParkirController extends Controller
 {
     public function scanIndex($kendaraanId)
     {
@@ -27,7 +26,7 @@ class UserParkirController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
 
-        return view('user.parkir.scan', compact('kendaraan'));
+        return view('pasien.parkir.scan', compact('kendaraan'));
     }
 
     public function detail($id)
@@ -39,13 +38,12 @@ class UserParkirController extends Controller
 
         if ($transaksi->status === 'aktif') {
             $menit = Carbon::parse($transaksi->waktu_masuk)->diffInMinutes(now());
-            $jam = max(1, ceil($menit / 60));
 
             $transaksi->estimasi_durasi = $menit;
-            $transaksi->estimasi_biaya = $jam * $transaksi->tarif_per_jam;
+            $transaksi->estimasi_biaya = 0; // Pasien diset Free
         }
 
-        return view('user.parkir.detail', compact('transaksi'));
+        return view('pasien.parkir.detail', compact('transaksi'));
     }
 
     public function scanStore(Request $request)
@@ -78,6 +76,7 @@ class UserParkirController extends Controller
                 'message' => 'Kendaraan masih di dalam area parkir'
             ], 422);
         }
+
         $qr = QRParkir::where('kode', $request->qr_kode)->first();
 
         if (!$qr || !$qr->aktif || $qr->status !== 'tersedia') {
@@ -86,8 +85,6 @@ class UserParkirController extends Controller
                 'message' => 'Kode QR tidak valid atau sudah kadaluarsa'
             ], 422);
         }
-
-        $tarif = Tarif::where('nama', strtolower($kendaraan->jenis))->first();
 
         DB::beginTransaction();
 
@@ -101,7 +98,7 @@ class UserParkirController extends Controller
                 'qr_parkir_id'    => $qr->id,
                 'waktu_masuk'     => now(),
                 'jenis_kendaraan' => $kendaraan->jenis,
-                'tarif_per_jam'   => $tarif->tarif_per_jam ?? 2000,
+                'tarif_per_jam'   => 0, // Set tarif 0 untuk pasien
                 'status'          => 'aktif'
             ]);
 
@@ -109,6 +106,7 @@ class UserParkirController extends Controller
                 'status' => 'terpakai',
                 'aktif'  => false
             ]);
+
             do {
                 $kodeBaru = 'PKR-' . Str::upper(Str::random(8));
             } while (QRParkir::where('kode', $kodeBaru)->exists());
@@ -143,11 +141,12 @@ class UserParkirController extends Controller
             return response()->json([
                 'success'  => true,
                 'message'  => 'Gate berhasil dibuka!',
-                'redirect' => route('user.dashboard.parkir.detail', $transaksi->id)
+                // Pastikan route name `pasien.parkir.detail` terdaftar di web.php Anda
+                'redirect' => route('pasien.parkir.detail', $transaksi->id) 
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("User Scan MQTT Error: " . $e->getMessage());
+            Log::error("Pasien Scan MQTT Error: " . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -155,7 +154,6 @@ class UserParkirController extends Controller
             ], 500);
         }
     }
-
 
     public function getStatusApi($id)
     {
@@ -175,7 +173,7 @@ class UserParkirController extends Controller
                 ? Carbon::parse($transaksi->waktu_keluar)->format('H:i')
                 : '--:--',
             'durasi_teks' => floor($totalMenit / 60) . " jam " . ($totalMenit % 60) . " menit",
-            'total_bayar_formatted' => number_format($transaksi->total_bayar ?? 0, 0, ',', '.')
+            'total_bayar_formatted' => '0 (Free)' 
         ]);
     }
 }

@@ -83,9 +83,11 @@
                         <thead class="table-light text-secondary">
                             <tr>
                                 <th class="py-3 text-uppercase small fw-bold">Plat Nomor</th>
-                                <th class="py-3 text-uppercase small fw-bold">Jenis</th>
+                                <th class="py-3 text-uppercase small fw-bold">Jenis Pengguna</th>
+                                <th class="py-3 text-uppercase small fw-bold">Jenis Kendaraan</th>
                                 <th class="py-3 text-uppercase small fw-bold">Jam Masuk</th>
                                 <th class="py-3 text-uppercase small fw-bold">Durasi (Menit)</th>
+                                <th class="py-3 text-uppercase small fw-bold">Total Tarif</th>
                                 <th class="py-3 text-uppercase small fw-bold">Aksi</th>
                             </tr>
                         </thead>
@@ -255,25 +257,25 @@
                         : `<span class="small" style="font-size:0.7rem">KOSONG</span>`;
 
                     slotHtml += `
-                                <div class="slot ${statusClass} ${isProcessing ? 'opacity-50 border-primary' : ''}">
-                                    <span class="kode-slot">${s.kode}</span>
-                                    <span class="material-icons">${icon}</span>
-                                    <div class="plat-info mt-1">
-                                        ${isProcessing ? `<div class="spinner-border spinner-border-sm text-primary"></div>` : displayText}
-                                    </div>
-                                </div>`;
+                                                            <div class="slot ${statusClass} ${isProcessing ? 'opacity-50 border-primary' : ''}">
+                                                                <span class="kode-slot">${s.kode}</span>
+                                                                <span class="material-icons">${icon}</span>
+                                                                <div class="plat-info mt-1">
+                                                                    ${isProcessing ? `<div class="spinner-border spinner-border-sm text-primary"></div>` : displayText}
+                                                                </div>
+                                                            </div>`;
                 });
 
                 html += `
-                            <div class="card border-0 shadow-sm mb-3">
-                                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                                    <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
-                                    <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
-                                </div>
-                                <div class="card-body bg-light-subtle">
-                                    <div class="slot-grid">${slotHtml}</div>
-                                </div>
-                            </div>`;
+                                                        <div class="card border-0 shadow-sm mb-3">
+                                                            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                                                <h6 class="fw-bold mb-0 text-primary">${k.nama}</h6>
+                                                                <span class="badge bg-light text-dark border">Kapasitas: ${k.kapasitas}</span>
+                                                            </div>
+                                                            <div class="card-body bg-light-subtle">
+                                                                <div class="slot-grid">${slotHtml}</div>
+                                                            </div>
+                                                        </div>`;
             });
             wrapper.innerHTML = html;
         }
@@ -282,30 +284,65 @@
             const search = document.getElementById('searchPlat').value.toUpperCase();
 
             if (activeTransactions.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Tidak ada kendaraan parkir.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Tidak ada kendaraan parkir.</td></tr>`;
                 return;
             }
 
             let html = '';
             activeTransactions.forEach(t => {
                 if (search && !t.plat.toUpperCase().includes(search)) return;
+
+                let badgeClass = 'bg-secondary';
+
+                switch (t.role_user) {
+                    case 'admin':
+                        badgeClass = 'bg-danger';
+                        break;
+                    case 'petugas':
+                        badgeClass = 'bg-warning text-dark';
+                        break;
+                    case 'pegawai':
+                        badgeClass = 'bg-success';
+                        break;
+                    case 'pasien':
+                        badgeClass = 'bg-primary';
+                        break;
+                    case 'user':
+                        badgeClass = 'bg-secondary';
+                        break;
+                }
+
+                const roleBadge = `
+                                <span class="badge ${badgeClass} d-inline-block text-center py-2" style="width:90px;">
+                                    ${(t.role_user ?? '-').toUpperCase()}
+                                </span>`;
+
+                const isFree = (t.role_user === 'pasien' || t.role_user === 'pegawai');
+                const durasiMenit = t.total_waktu || 0;
+                const jumlahJam = Math.ceil(durasiMenit / 60) || 1;
+                const tarifPerJam = isFree ? 0 : (t.tarif || 0);
+                const totalTarifSementara = jumlahJam * tarifPerJam;
+
                 html += `
-                                            <tr>
-                                                <td class="ps-3 fw-bold">${t.plat}</td>
-                                                <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
-                                                <td>${t.masuk}</td>
-                                                <td><span class="text-primary fw-bold">${t.total_waktu}</span> mnt</td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-primary px-3 rounded-pill" onclick="openModal(${t.id})">
-                                                        <i class="bi bi-box-arrow-right me-1"></i> Keluar
-                                                    </button>
-                                                </td>
-                                            </tr>`;
+                    <tr>
+                        <td class="ps-3 fw-bold">${t.plat}</td>
+                        <td>${roleBadge}</td>
+                        <td><span class="badge bg-secondary-subtle text-dark text-uppercase py-2 px-3">${t.jenis}</span></td>
+                        <td>${t.masuk}</td>
+                        <td><span class="text-primary fw-bold">${formatDurasiTeks(t.total_waktu)}</span></td>
+                        <td class="fw-semibold text-dark">Rp ${formatRupiah(totalTarifSementara)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary px-3 rounded-pill" onclick="openModal(${t.id})">
+                                <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                            </button>
+                        </td>
+                    </tr>`;
             });
+
             tbody.innerHTML = html;
         }
 
-        function openModal(id) {
+       function openModal(id) {
             const trx = activeTransactions.find(t => t.id === id);
             if (!trx) return;
 
@@ -314,7 +351,9 @@
             document.getElementById('m_jenis').innerText = trx.jenis;
             document.getElementById('m_masuk').innerText = formatTime(trx.waktu_masuk);
 
-            const tarifPerJam = trx.tarif ?? 0;
+            const isFree = (trx.role_user === 'pasien' || trx.role_user === 'pegawai');
+            const tarifPerJam = isFree ? 0 : (trx.tarif ?? 0);
+            
             document.getElementById('m_tarif').innerText = 'Rp ' + formatRupiah(tarifPerJam);
 
             const masuk = new Date(trx.waktu_masuk);
@@ -327,7 +366,6 @@
 
             new bootstrap.Modal(document.getElementById('modalTransaksi')).show();
         }
-
         async function keluarkanKendaraan() {
             if (!selectedTransaksi) return;
             const confirm = await Swal.fire({
@@ -385,119 +423,119 @@
             if (!printWindow) return;
 
             const html = `
-                <html>
-                <head>
-                    <style>
-                        @page { size: 58mm auto; margin: 0; }
-                        body {
-                            font-family: 'Courier New', monospace;
-                            width: 58mm;
-                            margin: 0 auto;
-                            padding: 8px;
-                            font-size: 11px;
-                            color: #000;
-                            line-height: 1.2;
-                        }
-                        .center { text-align: center; }
-                        .bold { font-weight: bold; }
-                        .title { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
-                        .line {
-                            border-top: 1px dashed #000;
-                            margin: 6px 0;
-                        }
-                        .row {
-                            display: flex;
-                            justify-content: space-between;
-                            margin: 2px 0;
-                        }
-                        .box {
-                            border: 1px solid #000;
-                            padding: 5px;
-                            margin: 5px 0;
-                        }
-                        .footer {
-                            text-align: center;
-                            margin-top: 10px;
-                            font-size: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="center title">
-                        ${(settings.app_name ?? 'SMART PARKING').toUpperCase()}
-                    </div>
+                                            <html>
+                                            <head>
+                                                <style>
+                                                    @page { size: 58mm auto; margin: 0; }
+                                                    body {
+                                                        font-family: 'Courier New', monospace;
+                                                        width: 58mm;
+                                                        margin: 0 auto;
+                                                        padding: 8px;
+                                                        font-size: 11px;
+                                                        color: #000;
+                                                        line-height: 1.2;
+                                                    }
+                                                    .center { text-align: center; }
+                                                    .bold { font-weight: bold; }
+                                                    .title { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
+                                                    .line {
+                                                        border-top: 1px dashed #000;
+                                                        margin: 6px 0;
+                                                    }
+                                                    .row {
+                                                        display: flex;
+                                                        justify-content: space-between;
+                                                        margin: 2px 0;
+                                                    }
+                                                    .box {
+                                                        border: 1px solid #000;
+                                                        padding: 5px;
+                                                        margin: 5px 0;
+                                                    }
+                                                    .footer {
+                                                        text-align: center;
+                                                        margin-top: 10px;
+                                                        font-size: 10px;
+                                                    }
+                                                </style>
+                                            </head>
+                                            <body>
+                                                <div class="center title">
+                                                    ${(settings.app_name ?? 'SMART PARKING').toUpperCase()}
+                                                </div>
 
-                    <div class="center" style="font-size:10px;">
-                        ${settings.lokasi_parkir ?? '-'}
-                    </div>
+                                                <div class="center" style="font-size:10px;">
+                                                    ${settings.lokasi_parkir ?? '-'}
+                                                </div>
 
-                    <div class="center" style="font-size:10px;">
-                        ${settings.alamat ?? '-'}
-                    </div>
+                                                <div class="center" style="font-size:10px;">
+                                                    ${settings.alamat ?? '-'}
+                                                </div>
 
-                    <div class="center" style="font-size:10px;">
-                        ${settings.kontak ?? '-'}
-                    </div>
+                                                <div class="center" style="font-size:10px;">
+                                                    ${settings.kontak ?? '-'}
+                                                </div>
 
-                    <div class="line"></div>
+                                                <div class="line"></div>
 
-                    <div class="row">
-                        <span>Kode Transaksi</span>
-                        <span>#${data.kode_qr ?? '-'}</span>
-                    </div>
+                                                <div class="row">
+                                                    <span>Kode Transaksi</span>
+                                                    <span>#${data.kode_qr ?? '-'}</span>
+                                                </div>
 
-                    <div class="row">
-                        <span>Petugas</span>
-                        <span>${data.petugas ?? '-'}</span>
-                    </div>
+                                                <div class="row">
+                                                    <span>Petugas</span>
+                                                    <span>${data.petugas ?? '-'}</span>
+                                                </div>
 
-                    <div class="line"></div>
+                                                <div class="line"></div>
 
-                    <div class="box">
-                        <div class="row"><span>PLAT</span><span class="bold">${data.plat_nomor}</span></div>
-                        <div class="row"><span>JENIS</span><span>${data.jenis ?? '-'}</span></div>
-                    </div>
+                                                <div class="box">
+                                                    <div class="row"><span>PLAT</span><span class="bold">${data.plat_nomor}</span></div>
+                                                    <div class="row"><span>JENIS</span><span>${data.jenis ?? '-'}</span></div>
+                                                </div>
 
-                    <div class="line"></div>
+                                                <div class="line"></div>
 
-                    <div class="row">
-                        <span>Masuk</span>
-                        <span>${formatFullDate(data.waktu_masuk)}</span>
-                    </div>
+                                                <div class="row">
+                                                    <span>Masuk</span>
+                                                    <span>${formatFullDate(data.waktu_masuk)}</span>
+                                                </div>
 
-                    <div class="row">
-                        <span>Keluar</span>
-                        <span>${formatFullDate(data.waktu_keluar)}</span>
-                    </div>
+                                                <div class="row">
+                                                    <span>Keluar</span>
+                                                    <span>${formatFullDate(data.waktu_keluar)}</span>
+                                                </div>
 
-                    <div class="row">
-                        <span>Durasi</span>
-                        <span>${durasiStr}</span>
-                    </div>
+                                                <div class="row">
+                                                    <span>Durasi</span>
+                                                    <span>${durasiStr}</span>
+                                                </div>
 
-                    <div class="line"></div>
+                                                <div class="line"></div>
 
-                    <div class="row bold" style="font-size:13px;">
-                        <span>TOTAL</span>
-                        <span>Rp ${formatRupiah(data.total_bayar)}</span>
-                    </div>
+                                                <div class="row bold" style="font-size:13px;">
+                                                    <span>TOTAL</span>
+                                                    <span>Rp ${formatRupiah(data.total_bayar)}</span>
+                                                </div>
 
-                    <div class="line"></div>
+                                                <div class="line"></div>
 
-                    <div class="footer">
-                        TERIMA KASIH ATAS KUNJUNGAN ANDA<br>
-                        SILAKAN SIMPAN STRUK INI
-                    </div>
+                                                <div class="footer">
+                                                    TERIMA KASIH ATAS KUNJUNGAN ANDA<br>
+                                                    SILAKAN SIMPAN STRUK INI
+                                                </div>
 
-                    <script>
-                        window.onload = function () {
-                            window.print();
-                            setTimeout(() => window.close(), 500);
-                        }
-                    <\/script>
-                </body>
-                </html>
-            `;
+                                                <script>
+                                                    window.onload = function () {
+                                                        window.print();
+                                                        setTimeout(() => window.close(), 500);
+                                                    }
+                                                <\/script>
+                                            </body>
+                                            </html>
+                                        `;
 
             printWindow.document.write(html);
             printWindow.document.close();

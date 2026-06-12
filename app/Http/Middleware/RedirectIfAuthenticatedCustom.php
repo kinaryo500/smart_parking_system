@@ -22,6 +22,14 @@ class RedirectIfAuthenticatedCustom
                 return redirect()->route('petugas.dashboard');
             }
 
+            if ($user->role === 'pegawai') {
+                return redirect()->route('pegawai.dashboard');
+            }
+
+            if ($user->role === 'pasien') {
+                return redirect()->route('pasien.dashboard');
+            }
+
             if ($user->role === 'user') {
                 return redirect()->route('user.dashboard');
             }
