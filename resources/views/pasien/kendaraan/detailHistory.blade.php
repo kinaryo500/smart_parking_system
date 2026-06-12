@@ -164,7 +164,7 @@
 
         <div class="d-grid mt-4">
             <a href="{{ route('pasien.dashboard') }}" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
-                <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
+                <i class="bi bi-arrow-left me-1"></i>Kembali
             </a>
         </div>
 

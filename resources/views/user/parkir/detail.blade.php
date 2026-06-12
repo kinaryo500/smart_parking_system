@@ -520,7 +520,7 @@
             <a href="{{ route('user.dashboard') }}"
                 class="btn btn-outline-secondary fw-bold py-2">
 
-                Kembali ke Dashboard
+               Kembali
 
             </a>
 

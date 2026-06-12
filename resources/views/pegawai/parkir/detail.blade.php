@@ -331,7 +331,7 @@
 
         <div class="d-grid mt-4">
             <a href="{{ route('pegawai.dashboard') }}" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
-                Kembali ke Dashboard
+               Kembali
             </a>
         </div>
     </div>
