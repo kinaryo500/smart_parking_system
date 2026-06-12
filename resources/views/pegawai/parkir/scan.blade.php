@@ -40,14 +40,14 @@
         }
 
         .btn-switch-cam {
-            background-color: var(--bs-success) !important;
+            background-color: var(--bs-primary) !important;
             color: white !important;
             border: none !important;
             padding: 10px 20px !important;
             border-radius: 50px !important;
             font-weight: 600 !important;
             font-size: 14px !important;
-            box-shadow: 0 4px 6px rgba(25, 135, 84, 0.2) !important;
+            box-shadow: 0 4px 6px rgba(var(--bs-primary-rgb), 0.2) !important;
         }
 
         /* Input Manual Styling */
@@ -64,7 +64,7 @@
 @section('content')
     <div class="container py-4">
         <div class="text-center mb-4">
-            <h5 class="fw-bold mb-1 text-success">Masuk Parkir Pegawai</h5>
+            <h5 class="fw-bold mb-1 text-primary">Masuk Parkir Pegawai</h5>
             <p class="text-muted small">Pindai QR pada layar gate masuk (Akses Gratis)</p>
         </div>
 
@@ -89,7 +89,7 @@
                 <input type="text" id="manualCode"
                     class="form-control form-control-lg rounded-pill-start border-0 shadow-none"
                     placeholder="Contoh: PKR-XXXXX" style="font-size: 0.9rem;">
-                <button onclick="handleManualInput()" class="btn btn-success rounded-pill-end px-4 fw-bold">KIRIM</button>
+                <button onclick="handleManualInput()" class="btn btn-primary rounded-pill-end px-4 fw-bold">KIRIM</button>
             </div>
         </div>
 
@@ -100,7 +100,7 @@
                     <span class="fw-bold text-dark d-block">{{ strtoupper($kendaraan->plat_nomor) }}</span>
                     <span class="text-muted small">{{ $kendaraan->merk }} • {{ $kendaraan->warna }}</span>
                 </div>
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill small">Free</span>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill small">Free</span>
             </div>
         </div>
 
@@ -172,10 +172,10 @@
             if (isProcessing) return;
             isProcessing = true;
 
-            updateStatus("Memproses...", "bg-success text-white", "bi-hourglass-split");
+            updateStatus("Memproses...", "bg-primary text-white", "bi-hourglass-split");
 
             // Mengarahkan fetch ke URL/Route Store khusus Pegawai
-            fetch("{{ route('pegawai.parkir.scan.store') }}", {
+            fetch("{{ route('pegawai.scan.qr') }}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -186,37 +186,37 @@
                     kendaraan_id: KENDARAAN_ID
                 })
             })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) throw data;
-                    return data;
-                })
-                .then(res => {
-                    if (res.success) {
-                        if (html5QrCode) html5QrCode.stop();
-                        updateStatus("Berhasil!", "bg-success text-white", "bi-check-circle-fill");
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Gate Terbuka!',
-                            text: 'Akses Pegawai dikonfirmasi. Silahkan masuk.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = res.redirect;
-                        });
-                    }
-                })
-                .catch(err => {
-                    isProcessing = false;
-                    let message = err.message || "Kode tidak valid atau sistem sibuk";
-                    showError(message);
-                    updateStatus("Gagal", "bg-danger text-white", "bi-exclamation-circle");
+            .then(async res => {
+                const data = await res.json();
+                if (!res.ok) throw data;
+                return data;
+            })
+            .then(res => {
+                if (res.success) {
+                    if (html5QrCode) html5QrCode.stop();
+                    updateStatus("Berhasil!", "bg-primary text-white", "bi-check-circle-fill");
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Gate Terbuka!',
+                        text: 'Akses Pegawai dikonfirmasi. Silahkan masuk.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = res.redirect;
+                    });
+                }
+            })
+            .catch(err => {
+                isProcessing = false;
+                let message = err.message || "Kode tidak valid atau sistem sibuk";
+                showError(message);
+                updateStatus("Gagal", "bg-danger text-white", "bi-exclamation-circle");
 
-                    setTimeout(() => {
-                        document.getElementById('debugError').classList.add('d-none');
-                        updateStatus("Siap Scan", "bg-white text-warning", "bi-camera");
-                    }, 4000);
-                });
+                setTimeout(() => {
+                    document.getElementById('debugError').classList.add('d-none');
+                    updateStatus("Siap Scan", "bg-white text-warning", "bi-camera");
+                }, 4000);
+            });
         }
 
         // --- HELPERS ---
