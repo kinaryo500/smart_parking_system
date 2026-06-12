@@ -91,7 +91,7 @@
                         Rp <span class="run-cost">0</span>
                     </div>
 
-                    <a href="{{ route('pasien.dashboard.parkir.detail', $p->id) }}"
+                    <a href="{{ route('pasien.parkir.detail', $p->id) }}"
                        class="btn btn-sm btn-primary mt-2 rounded-pill px-3">
                         Detail
                     </a>

@@ -40,14 +40,14 @@
         }
 
         .btn-switch-cam {
-            background-color: var(--bs-success) !important;
+            background-color: var(--bs-primary) !important;
             color: white !important;
             border: none !important;
             padding: 10px 20px !important;
             border-radius: 50px !important;
             font-weight: 600 !important;
             font-size: 14px !important;
-            box-shadow: 0 4px 6px rgba(25, 135, 84, 0.2) !important;
+            box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2) !important;
         }
 
         /* Input Manual Styling */
@@ -64,12 +64,12 @@
 @section('content')
     <div class="container py-4">
         <div class="text-center mb-4">
-            <h5 class="fw-bold mb-1 text-success">Masuk Parkir Pasien</h5>
+            <h5 class="fw-bold mb-1 text-primary">Masuk Parkir Pasien</h5>
             <p class="text-muted small">Pindai QR pada layar gate masuk (Bebas Biaya)</p>
         </div>
 
         <div class="scanner-wrapper">
-            <div id="statusBadge" class="scan-status-badge bg-white text-warning">
+            <div id="statusBadge" class="scan-status-badge bg-white text-primary">
                 <span id="statusText"><i class="bi bi-camera me-1"></i> Menyiapkan Kamera...</span>
             </div>
 
@@ -89,7 +89,7 @@
                 <input type="text" id="manualCode"
                     class="form-control form-control-lg rounded-pill-start border-0 shadow-none"
                     placeholder="Contoh: PKR-XXXXX" style="font-size: 0.9rem;">
-                <button onclick="handleManualInput()" class="btn btn-success rounded-pill-end px-4 fw-bold">KIRIM</button>
+                <button onclick="handleManualInput()" class="btn btn-primary rounded-pill-end px-4 fw-bold">KIRIM</button>
             </div>
         </div>
 
@@ -100,7 +100,7 @@
                     <span class="fw-bold text-dark d-block">{{ strtoupper($kendaraan->plat_nomor) }}</span>
                     <span class="text-muted small">{{ $kendaraan->merk }} • {{ $kendaraan->warna }}</span>
                 </div>
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill small">Free</span>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill small">Free</span>
             </div>
         </div>
 
@@ -155,7 +155,7 @@
             const config = { fps: 20, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
             try {
                 await html5QrCode.start(cameraId, config, (decodedText) => onScanSuccess(decodedText));
-                updateStatus("Siap Scan", "bg-white text-warning", "bi-camera");
+                updateStatus("Siap Scan", "bg-white text-primary", "bi-camera");
             } catch (err) {
                 console.error(err);
             }
@@ -172,10 +172,10 @@
             if (isProcessing) return;
             isProcessing = true;
 
-            updateStatus("Memproses...", "bg-success text-white", "bi-hourglass-split");
+            updateStatus("Memproses...", "bg-primary text-white", "bi-hourglass-split");
 
             // Mengarahkan fetch ke URL/Route Store khusus Pasien
-            fetch("{{ route('pasien.parkir.scan.store') }}", {
+            fetch("{{ route('pasien.scan.qr') }}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -214,7 +214,7 @@
 
                 setTimeout(() => {
                     document.getElementById('debugError').classList.add('d-none');
-                    updateStatus("Siap Scan", "bg-white text-warning", "bi-camera");
+                    updateStatus("Siap Scan", "bg-white text-primary", "bi-camera");
                 }, 4000);
             });
         }

@@ -45,6 +45,26 @@
         font-weight: 600;
         font-size: 0.85rem;
     }
+
+    .info-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 8px;
+        height: 100%;
+    }
+
+    .info-box small {
+        font-size: .65rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .info-box div {
+        font-size: .9rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
 </style>
 @endpush
 
@@ -64,13 +84,24 @@
             @endif
         </div>
 
-        <h5 class="fw-bold mb-1">{{ strtoupper($kendaraan->plat_nomor) }}</h5>
+        <h5 class="fw-bold mb-1 text-primary">{{ strtoupper($kendaraan->plat_nomor) }}</h5>
         <p class="text-muted small mb-2">
-            {{ ucfirst($kendaraan->jenis) • {{ $kendaraan->merk }} • {{ $kendaraan->warna }}
+            {{ ucfirst($kendaraan->jenis) }} • {{ $kendaraan->merk }} • {{ $kendaraan->warna }}
         </p>
+        
+        {{-- Info Tarif/Jam khusus pasien --}}
+        <div class="row g-2 justify-content-center mb-3 mt-1">
+            <div class="col-6 col-sm-4">
+                <div class="info-box">
+                    <small>Tarif/Jam</small>
+                    <div>Rp 0 (Free)</div>
+                </div>
+            </div>
+        </div>
+
         <div>
             <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 small fw-semibold">
-                Akses Pasien (Tarif Berlaku)
+                Akses Pasien (Bebas Biaya)
             </span>
         </div>
     </div>
@@ -87,7 +118,7 @@
                     <div class="text-muted small">
                         <i class="bi bi-clock me-1"></i> <span id="time-{{ $i }}">0 menit</span> 
                         <span class="mx-1">•</span>
-                        <span class="text-primary fw-semibold"><span id="cost-{{ $i }}">Tarif Berlaku</span></span>
+                        <span class="text-primary fw-semibold"><span id="cost-{{ $i }}">Tarif Sesuai Durasi</span></span>
                     </div>
                 </div>
                 
@@ -115,7 +146,6 @@
                     let waktuText = jam > 0 ? `${jam} jam ${menit} menit` : `${menit} menit`;
 
                     document.getElementById('time-{{ $i }}').innerText = waktuText;
-                    document.getElementById('cost-{{ $i }}').innerText = "Tarif Sesuai Durasi";
                 }
                 updateTime{{ $i }}();
                 setInterval(updateTime{{ $i }}, 10000); 
@@ -150,12 +180,12 @@
                             Sedang Parkir
                         @endif
                         <span class="mx-1">•</span>
-                        <span class="fw-medium text-primary">Tarif Berlaku</span>
+                        <span class="fw-medium text-primary">Rp 0 (Free)</span>
                     </div>
                 </div>
 
                 <div>
-                    <a href="{{ route('pasien.kendaraan.detail-history', $t->id) }}" class="btn btn-outline-secondary btn-detail">
+                    <a href="{{ route('pasien.kendaraan.detail-history', $t->id) }}" class="btn btn-outline-primary btn-detail">
                         Detail
                     </a>
                 </div>
@@ -175,7 +205,7 @@
     </div>
 
     <div class="text-center mt-4 mb-5">
-        <a href="javascript:history.back()" class="btn btn-primary px-5 w-100 py-2 rounded fw-bold shadow-sm">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
             <i class="bi bi-arrow-left me-2"></i> Kembali
         </a>
     </div>

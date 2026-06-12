@@ -17,7 +17,6 @@
 
     .material-symbols-rounded{
         font-size:56px;
-        color: #198754; /* Diubah ke nuansa hijau/sukses untuk pasien */
     }
 
     .info-box{
@@ -243,14 +242,14 @@
             @endphp
 
             @if($jenis == 'motor')
-                <span class="material-symbols-rounded">two_wheeler</span>
+                <span class="material-symbols-rounded {{ $transaksi->status == 'aktif' ? 'text-primary' : 'text-success' }}" id="iconStatus">two_wheeler</span>
             @elseif($jenis == 'mobil')
-                <span class="material-symbols-rounded">directions_car</span>
+                <span class="material-symbols-rounded {{ $transaksi->status == 'aktif' ? 'text-primary' : 'text-success' }}" id="iconStatus">directions_car</span>
             @else
-                <span class="material-symbols-rounded">help_center</span>
+                <span class="material-symbols-rounded {{ $transaksi->status == 'aktif' ? 'text-primary' : 'text-success' }}" id="iconStatus">help_center</span>
             @endif
 
-            <h5 class="fw-bold mt-2 mb-0 text-success">Detail Parkir Pasien</h5>
+            <h5 class="fw-bold mt-2 mb-0 {{ $transaksi->status == 'aktif' ? 'text-primary' : 'text-success' }}" id="titleText">Detail Parkir Pasien</h5>
 
             <div class="mt-1">
                 <span id="statusBadge"
@@ -317,8 +316,8 @@
                 @endif
             </div>
 
-            {{-- Box Biaya Selalu Dibuat Free/Hijau --}}
-            <div id="biayaBox" class="mt-4 p-4 rounded-4 bg-success text-white">
+            {{-- Box Biaya Dinamis (Biru saat aktif, Hijau saat selesai) --}}
+            <div id="biayaBox" class="mt-4 p-4 rounded-4 {{ $transaksi->status == 'aktif' ? 'bg-primary' : 'bg-success' }} text-white">
                 <small id="biayaLabel" class="d-block opacity-75 text-uppercase fw-bold" style="font-size:.7rem;">
                     {{ $transaksi->status == 'aktif' ? 'Estimasi Biaya' : 'Total Pembayaran' }}
                 </small>
@@ -329,7 +328,7 @@
         </div>
 
         <div class="d-grid mt-4">
-            <a href="{{ route('pasien.dashboard') }}" class="btn btn-outline-success fw-bold py-2 rounded-pill">
+            <a href="{{ route('pasien.dashboard') }}" id="btnKembali" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
                 Kembali ke Dashboard
             </a>
         </div>
@@ -379,7 +378,6 @@
 
     async function syncStatus(){
         try{
-            // Sesuaikan endpoint route status transaksi pasien Anda
             const res = await fetch(`/pasien/transaksi/status/${transaksiId}?t=${Date.now()}`);
             const data = await res.json();
 
@@ -393,11 +391,21 @@
                 badge.className = "status-badge bg-light-success text-success blink";
                 badge.innerText = "SELESAI";
 
-                document.getElementById('biayaBox').className = "mt-4 p-4 rounded-4 bg-success text-white";
+                // Ubah warna ikon dan teks header menjadi hijau saat selesai
+                document.getElementById('iconStatus').className = "material-symbols-rounded text-success";
+                document.getElementById('titleText').className = "fw-bold mt-2 mb-0 text-success";
+
+                // Ubah box estimasi menjadi hijau dan ganti label
+                const biayaBox = document.getElementById('biayaBox');
+                biayaBox.className = "mt-4 p-4 rounded-4 bg-success text-white";
                 document.getElementById('biayaLabel').innerText = "TOTAL PEMBAYARAN";
+                
+                // Ubah tombol kembali menjadi outline hijau
+                document.getElementById('btnKembali').className = "btn btn-outline-success fw-bold py-2 rounded-pill";
+
                 document.getElementById('jamKeluar').innerText = data.waktu_keluar;
                 document.getElementById('durasiDisplay').innerText = data.durasi_teks;
-                document.getElementById('biayaDisplay').innerText = "0"; // Force 0
+                document.getElementById('biayaDisplay').innerText = "0";
 
                 document.getElementById('notifSound').play();
 

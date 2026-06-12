@@ -175,7 +175,7 @@
     </div>
 
     <div class="text-center mt-4 mb-5">
-        <a href="javascript:history.back()" class="btn btn-primary px-5 w-100 py-2 rounded fw-bold shadow-sm">
+              <a href="javascript:history.back()" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
             <i class="bi bi-arrow-left me-2"></i> Kembali
         </a>
     </div>

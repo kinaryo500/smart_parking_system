@@ -330,7 +330,7 @@
         </div>
 
         <div class="d-grid mt-4">
-            <a href="{{ route('user.dashboard') }}" class="btn btn-outline-primary fw-bold py-2">
+            <a href="{{ route('user.dashboard') }}" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
                 Kembali ke Dashboard
             </a>
         </div>

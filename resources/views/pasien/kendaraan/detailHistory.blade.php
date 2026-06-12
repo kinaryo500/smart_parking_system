@@ -79,11 +79,11 @@
                 @endif
             </div>
 
-            <h5 class="fw-bold mb-0">Detail Transaksi Pasien</h5>
+            <h5 class="fw-bold mb-0 text-primary">Detail Transaksi Pasien</h5>
 
             <div class="mt-2">
                 <span id="statusBadge"
-                    class="status-badge transition-all {{ $transaksi->status == 'aktif' ? 'bg-light-primary' : 'bg-light-success' }}">
+                    class="status-badge transition-all {{ $transaksi->status == 'aktif' ? 'bg-light-primary text-primary' : 'bg-light-success text-success' }}">
                     {{ strtoupper($transaksi->status) }}
                 </span>
             </div>
@@ -126,10 +126,10 @@
                 </div>
             </div>
 
-            <div class="col-6 col-sm-4 mx-auto">
+            <div class="col-6 col-sm-4 mx-auto mt-sm-0 mt-2">
                 <div class="info-box">
                     <small>Tarif / Ketentuan</small>
-                    <div class="text-primary">Tarif Pasien</div>
+                    <div class="">Rp 0 (Free)</div>
                 </div>
             </div>
         </div>
@@ -157,13 +157,13 @@
                 </small>
 
                 <div class="fw-bold fs-2 mt-1">
-                    <span id="biayaDisplay">Menghitung...</span>
+                    Rp <span id="biayaDisplay">0</span>
                 </div>
             </div>
         </div>
 
         <div class="d-grid mt-4">
-            <a href="{{ route('pasien.dashboard') }}" class="btn btn-outline-secondary fw-bold py-2 rounded-pill">
+            <a href="{{ route('pasien.dashboard') }}" class="btn btn-outline-secondary px-5 w-100 py-2 rounded fw-bold shadow-sm">
                 <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
             </a>
         </div>
@@ -180,6 +180,12 @@
     let currentStatus = "{{ $transaksi->status }}";
     let liveInterval;
 
+    function formatDurasi(menit){
+        const jam = Math.floor(menit / 60);
+        const sisa = menit % 60;
+        return jam > 0 ? `${jam} jam ${sisa} menit` : `${menit} menit`;
+    }
+
     function startLiveCounter() {
         const start = new Date("{{ $transaksi->waktu_masuk }}").getTime();
 
@@ -188,14 +194,9 @@
             const diff = Math.max(0, now - start);
 
             const menitTotal = Math.floor(diff / 60000);
-            const jam = Math.floor(menitTotal / 60);
-            const menitSisa = menitTotal % 60;
 
-            document.getElementById('durasiDisplay').innerHTML = 
-                jam > 0 ? `${jam} jam ${menitSisa} menit` : `${menitTotal} menit`;
-            
-            // Anda dapat menyesuaikan estimasi biaya berdasarkan tarif pasien di sini
-            document.getElementById('biayaDisplay').innerText = "Rp 0"; 
+            document.getElementById('durasiDisplay').innerHTML = formatDurasi(menitTotal);
+            document.getElementById('biayaDisplay').innerText = "0"; 
         }
 
         liveInterval = setInterval(update, 1000);
@@ -231,7 +232,6 @@
         if (currentStatus === 'selesai') return;
 
         try {
-            // Ubah endpoint URL ke prefix pasien
             const res = await fetch(`/pasien/transaksi/status/${transaksiId}`);
             if (!res.ok) return;
 
@@ -246,6 +246,9 @@
                 badge.className = "status-badge bg-light-success text-success transition-all";
                 badge.innerText = "SELESAI";
 
+                // Ubah warna ikon header menjadi hijau
+                document.querySelector('.material-symbols-rounded').style.color = "#15803d";
+
                 const biayaBox = document.getElementById('biayaBox');
                 biayaBox.className = "mt-4 p-4 rounded-4 bg-success text-white transition-all";
 
@@ -253,12 +256,12 @@
                 document.getElementById('jamKeluar').innerText = data.waktu_keluar;
                 document.getElementById('durasiDisplay').innerText = data.durasi_teks;
                 
-                document.getElementById('biayaDisplay').innerText = data.total_bayar_formatted;
+                document.getElementById('biayaDisplay').innerText = "0";
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Parkir Selesai!',
-                    text: 'Sesi parkir kendaraan telah berakhir.',
+                    text: 'Sesi parkir kendaraan telah berakhir (Bebas Biaya).',
                     confirmButtonColor: '#15803d'
                 });
             }
