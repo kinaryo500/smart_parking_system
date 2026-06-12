@@ -1,4 +1,4 @@
-@extends('layouts.user-app')
+@extends('layouts.pegawai-app')
 
 @section('title', 'Detail Parkir | Smart Parking')
 
